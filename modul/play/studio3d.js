@@ -33,7 +33,9 @@ root.add(body);
 const FACE_ROT=[[0,0,0],[0,Math.PI/2,0],[0,Math.PI,0],[0,-Math.PI/2,0],[-Math.PI/2,0,0],[Math.PI/2,0,0]].map(e=>new T.Quaternion().setFromEuler(new T.Euler(...e)));
 const padGeo=new T.RoundedBoxGeometry(PAD,PAD,.09,3,.05);
 const OFF=new T.Color(0x2b2b32),OFF_E=new T.Color(0x000000);
-const labelTex=S.PADS.map(p=>makeLabel(p[2],'#ffffff')),labelDark=S.PADS.map(p=>makeLabel(p[2],'#0b0b0f'));
+let labelTex=S.PADS.map(p=>makeLabel(p[2],'#ffffff')),labelDark=S.PADS.map(p=>makeLabel(p[2],'#0b0b0f')),labelKey=S.PADS.map(p=>p[2]).join();
+/* les noms des pads changent avec le mode (musique, lumière, séance) */
+function relabel(names){const k=names.join();if(k===labelKey)return;labelKey=k;labelTex.forEach(t=>t.dispose());labelDark.forEach(t=>t.dispose());labelTex=names.map(n=>makeLabel(n,'#ffffff'));labelDark=names.map(n=>makeLabel(n,'#0b0b0f'))}
 const pads=[];/* pads[face][i] = {mesh,label,face,i} */
 const labelGeo=new T.PlaneGeometry(PAD*.92,PAD*.92);
 for(let f=0;f<6;f++){const g=new T.Group();g.quaternion.copy(FACE_ROT[f]);root.add(g);pads[f]=[];
@@ -46,7 +48,7 @@ function makeLabel(text,color){const c=document.createElement('canvas');c.width=
 
 const INSTC=S.INST.map(x=>new T.Color(x.c));
 const DIM=new T.Color(0x1a1a1f);
-export function refresh(){const used=S.used?S.used():null;for(let f=0;f<6;f++){const t=S.TYPES[f],lv=S.proj.pads[t],off=used&&!used.includes(t);for(let i=0;i<16;i++){const p=pads[f][i],l=off?0:lv[i],c=INSTC[S.PADS[i][0]];const mat=p.mesh.material;
+export function refresh(){if(S.padNames)relabel(S.padNames());const used=S.used?S.used():null;for(let f=0;f<6;f++){const t=S.TYPES[f],lv=S.proj.pads[t],off=used&&!used.includes(t);for(let i=0;i<16;i++){const p=pads[f][i],l=off?0:lv[i],c=INSTC[S.PADS[i][0]];const mat=p.mesh.material;
   if(off){mat.color.copy(DIM);mat.emissive.set(0);mat.emissiveIntensity=0;p.label.material.map=labelTex[i];p.label.material.opacity=.14;p.label.material.needsUpdate=true;continue}
   /* éteint : gris mat, nom en blanc discret · présent : couleur pleine, nom sombre · fort : couleur + légère lueur */
   const lm=p.label.material;

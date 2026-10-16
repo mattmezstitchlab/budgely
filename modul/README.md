@@ -41,6 +41,18 @@ Sans serveur, les pages statiques fonctionnent aussi (La Cote et le Studio reste
 | `GET /api/cote` | agrégats 30 j : classement (formule affichée dans la page), inventaire par région, totaux. `real:false` tant qu'il n'y a aucune donnée |
 | `GET /api/health` | — |
 
+### Modes : le moteur ne change pas, ce qu'il pilote si
+
+| Usage | Mode | Faces | Rangées | Panneau de sortie | Export |
+|---|---|---|---|---|---|
+| Chanson, jingle, pub, générique, film, berceuse, podcast, jeu, enfants | `music` | sections musicales | batterie / basse / accords / mélodie | — | MIDI, WAV, stems |
+| Mariage, concentration | `program` | moments avec heure et durée (« Dîner 18:45 · 2 h ») | idem | **Déroulé** : liste des moments, moment en cours, temps restant | déroulé `.txt` + extrait musical |
+| Soirée · Lumière | `light` | moments de la soirée | strobes / wash / ambiance / spots | **Scène** : projecteurs qui suivent les pads au tempo | feuille de cues `.csv` |
+| Yoga, sport, méditation | `session` | phases de la séance | rythme / ancrage / souffle / voix | **Séance** : cercle de respiration, consigne, intensité | plan de séance `.txt` |
+
+En mode programme/lumière/séance, chaque moment a un motif de 8 mesures que le moteur boucle pendant la durée réelle du moment ; le chef d'orchestre comprend « le dîner dure 2 h 30 », « commence à 18 h 30 », « première danse plus fort », « le dîner plus doux ».
+
+
 Règles : un niveau abandonné avant 50 % ne compte pas ; identifiant joueur anonyme (code `ref` local) ; pas de cookie, pas d'IP stockée ; 60 écritures/min/IP.
 
 ## Tests
