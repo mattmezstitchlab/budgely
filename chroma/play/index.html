@@ -135,6 +135,7 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:30px;letter-spacing:-1px;fon
 .scene-row .secondary{margin-top:0}
 .field{display:flex;flex-direction:column;gap:5px;text-align:left;margin-top:10px}
 .field label{font-size:9px;letter-spacing:1.5px;color:var(--muted);font-weight:700}
+.field select{background:#0b0f0c;border:1px solid #2a332b;color:var(--text);border-radius:8px;padding:10px 12px;font:inherit;font-size:13px}
 .field input{background:#0b0f0c;border:1px solid #2a332b;color:var(--text);border-radius:8px;padding:10px 12px;font:inherit;font-size:13px}
 .field input:focus{outline:2px solid var(--accent);outline-offset:1px}
 .analysis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0 6px}
@@ -216,6 +217,7 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:30px;letter-spacing:-1px;fon
 <p class="scene-status" id="sceneStatus">Titre actuel : Electric Bloom (synthétisé par le jeu).</p>
 <div class="scene-row"><button class="secondary" id="fileBtn">Charger un MP3 / WAV</button><button class="secondary" id="demoBtn">Démo : titre réel 124 BPM</button></div>
 <input type="file" id="fileInput" accept="audio/*" class="hidden">
+<div class="field"><label for="regionSelect">VOTRE RÉGION (facultatif · sert uniquement à la Cote et à l’inventaire, jamais revendu)</label><select id="regionSelect"><option value="">Non renseignée</option></select></div>
 <div class="field"><label for="artistName">ARTISTE</label><input id="artistName" placeholder="Nom de l’artiste" maxlength="60"></div>
 <div class="field"><label for="trackTitle">TITRE</label><input id="trackTitle" placeholder="Titre du morceau" maxlength="80"></div>
 <div class="field"><label for="artistLink">LIEN À FAIRE DÉCOUVRIR (pré-save, billetterie, boutique…)</label><input id="artistLink" placeholder="https://…" inputmode="url"></div>
@@ -255,7 +257,9 @@ return {pal,goal,moves,obs,bias};
 
 /* ---------- State ---------- */
 let level=0,unlocked=0,score=0,moves=16,collected=0,goal=24,target=0,pal=4,bias=.25,board=[],busy=false,state='intro',paused=false,page=0,toastTimer;
-let daily=false,dailyKey=0,dailyLabel='',campaignLevel=0,streak=0,grooves=0,onBeatTaps=0,lastWin=false,currentStage=0;
+let daily=false,dailyKey=0,dailyLabel='',campaignLevel=0,streak=0,grooves=0,onBeatTaps=0,tapsTotal=0,lastWin=false,currentStage=0;
+const REGIONS=['Hauts-de-France','Île-de-France','Belgique','Auvergne-Rhône-Alpes','Occitanie','Bretagne','Suisse romande','Québec','Autre'];
+let region='';try{region=localStorage.getItem('chroma-region')||''}catch(e){}
 let best={},levelStart=Date.now();
 try{
 unlocked=Math.min(LEVELS-1,Math.max(0,Number(localStorage.getItem('chroma-unlocked'))||0));level=unlocked;campaignLevel=level;
@@ -268,7 +272,7 @@ function init(l,opts={}){
 level=l;daily=!!opts.daily;
 const p=params(l);pal=p.pal;target=l%pal;goal=p.goal;moves=p.moves;bias=p.bias;
 rng=opts.seed!=null?mulberry32(opts.seed):Math.random;
-score=0;collected=0;busy=false;streak=0;grooves=0;onBeatTaps=0;lastWin=false;levelStart=Date.now();
+score=0;collected=0;busy=false;streak=0;grooves=0;onBeatTaps=0;tapsTotal=0;lastWin=false;levelStart=Date.now();
 board=Array.from({length:N},randomTile);
 if(p.obs){const idx=shuffle([...Array(N).keys()]);for(let j=0;j<p.obs;j++)board[idx[j]]={c:-1,s:false}}
 ensureMoves(false);render();update();
@@ -331,7 +335,7 @@ const g=group(i);
 if(g.length<2&&!board[i].s){el.classList.add('shake');setTimeout(()=>el.classList.remove('shake'),260);playTap(board[i].c,1,false);notify(board[i].c<0?'Les obstacles × se brisent en éliminant un groupe voisin.':'Associez au moins 2 cases de même couleur.');return}
 busy=true;moves--;
 const tappedColor=board[i].c;
-const beatHit=onBeat();let mult=1,groove=false;
+tapsTotal++;const beatHit=onBeat();let mult=1,groove=false;
 if(beatHit){streak++;onBeatTaps++;mult=2;if(streak>=3){streak=0;moves++;grooves++;groove=true}}else streak=0;
 const clear=new Set(g),special=g.filter(j=>board[j].s);
 if(board[i].s&&!special.includes(i))special.push(i);
@@ -378,13 +382,19 @@ $('resultEyebrow').textContent='COULEUR DU JOUR · '+r.label;
 $('resultTitle').textContent=r.win?'Accordé avec le monde.':'Presque.';
 $('resultText').textContent=r.win?'Piste bouclée en '+(r.movesTotal-r.movesLeft)+' coups. Revenez demain pour une nouvelle couleur.':'Il manquait '+(r.goal-r.collected)+' cases. Revenez demain pour une nouvelle couleur.';
 $('sharePreview').textContent=shareText(r);$('sharePreview').classList.remove('hidden');
-$('shareBtn').classList.remove('hidden');$('shareBtn').onclick=async()=>{const text=shareText(r);try{if(navigator.share){await navigator.share({text});return}}catch(e){if(e&&e.name==='AbortError')return}try{await navigator.clipboard.writeText(text);notify('Résultat copié. Collez-le où vous voulez !')}catch(e){notify('Copie impossible : sélectionnez le texte ci-dessus.')}};
+$('shareBtn').classList.remove('hidden');$('shareBtn').onclick=async()=>{const text=shareText(r);if(r.track&&r.track.title)api('/api/events',{player:playerId(),type:'share',title:r.track.title,artist:r.track.artist,region});try{if(navigator.share){await navigator.share({text});return}}catch(e){if(e&&e.name==='AbortError')return}try{await navigator.clipboard.writeText(text);notify('Résultat copié. Collez-le où vous voulez !')}catch(e){notify('Copie impossible : sélectionnez le texte ci-dessus.')}};
 $('nextBtn').textContent='Retour aux pistes';$('nextBtn').className='secondary';
 $('nextBtn').onclick=()=>{$('shareBtn').classList.add('hidden');$('sharePreview').classList.add('hidden');$('nextBtn').className='primary';init(campaignLevel);state='play';audioStart()};
 $('replayBtn').classList.add('hidden');
 if(r.fresh&&r.win)playVictory();
 }
+function playerId(){let c='';try{c=localStorage.getItem('chroma-ref')||''}catch(e){}if(!c){c=Math.random().toString(36).slice(2,8);save('chroma-ref',c)}return c}
+function api(path,body){try{fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),keepalive:true}).catch(()=>{})}catch(e){}}
+function sendPlay(win){
+api('/api/plays',{player:playerId(),title:trackMode?(trackInfo.title||'Titre sans nom'):'Electric Bloom',artist:trackMode?(trackInfo.artist||'Artiste'):'CHROMA Originals',trackUrl:trackMode?trackInfo.url:'',partner:!!(trackMode&&trackInfo.partner),real:trackMode,win,collected,goal,onBeatTaps,taps:tapsTotal,minutes:Math.round((Date.now()-levelStart)/600)/100,region,daily});
+}
 function logPlay(win){
+sendPlay(win);
 try{const list=JSON.parse(localStorage.getItem('chroma-plays')||'[]');
 list.push({t:Date.now(),title:trackMode?(trackInfo.title||'Titre sans nom'):'Electric Bloom',artist:trackMode?(trackInfo.artist||'Artiste'):'CHROMA Originals',real:trackMode,win,collected,goal,onBeatTaps,grooves,minutes:Math.round((Date.now()-levelStart)/600)/100,bpm:Math.round(bpm),daily,level:level+1});
 while(list.length>300)list.shift();localStorage.setItem('chroma-plays',JSON.stringify(list))}catch(e){}
@@ -574,7 +584,7 @@ $('artistCard').classList.toggle('hidden',!show);
 $('artistCardName').textContent=trackInfo.title||'Titre';$('artistCardSub').textContent=(trackInfo.artist||'Artiste')+(trackInfo.partner?' · Partenaire':'')+(analysisResult?' · '+Math.round(bpm)+' BPM · '+analysisResult.key.name:'');
 $('artistCardBtn').classList.toggle('hidden',!validLink(trackInfo.link));
 }
-function openArtist(){if(validLink(trackInfo.link))window.open(withRef(trackInfo.link),'_blank','noopener')}
+function openArtist(){if(validLink(trackInfo.link)){api('/api/events',{player:playerId(),type:'click',title:trackInfo.title,artist:trackInfo.artist,trackUrl:trackInfo.url,region});window.open(withRef(trackInfo.link),'_blank','noopener')}}
 $('artistCardBtn').onclick=openArtist;$('artistLinkBtn').onclick=openArtist;
 async function decodeArrayBuffer(ab){if(!ctx)buildAudio();return await new Promise((res,rej)=>{const p=ctx.decodeAudioData(ab,res,rej);if(p&&p.then)p.then(res,rej)})}
 $('fileBtn').onclick=()=>$('fileInput').click();
@@ -610,6 +620,8 @@ function openScene(){if(state==='intro')return;if(state==='play'&&!paused)pauseT
 $('sceneBtn').onclick=openScene;$('openSceneBtn').onclick=openScene;
 $('closeScene').onclick=()=>{$('sceneOverlay').classList.add('hidden');if(paused)pauseToggle()};
 (function bootScene(){
+REGIONS.forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;if(r===region)o.selected=true;$('regionSelect').appendChild(o)});
+$('regionSelect').onchange=e=>{region=e.target.value;save('chroma-region',region)};
 try{const saved=JSON.parse(localStorage.getItem('chroma-track-info')||'null');if(saved){['artistName','trackTitle','artistLink','trackUrl'].forEach((id,k)=>{$(id).value=[saved.artist,saved.title,saved.link,saved.url][k]||''})}}catch(e){}
 const q=new URLSearchParams(location.search);
 if(validLink(q.get('track')||'')){pendingTrack={url:q.get('track'),artist:q.get('artist')||'',title:q.get('title')||'',link:q.get('link')||'',partner:q.get('partner')==='1'};

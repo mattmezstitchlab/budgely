@@ -68,7 +68,14 @@ Une piste jouée = un niveau terminé sur le titre (≈ 3 min). Le taux « dans 
 <script src="../assets/demo-data.js"></script>
 <script>
 (()=>{
-const D=window.MUSICBOX_DEMO,$=id=>document.getElementById(id);
+const DEMO=window.MUSICBOX_DEMO,$=id=>document.getElementById(id);
+let D=DEMO,REAL=null,mode='demo';
+function adoptReal(r){
+const colors=DEMO.COLORS;
+const tracks=r.tracks.map((t,i)=>({...t,id:t.key,type:t.partner?'Partenaire':(t.real?'Titre':'Synthé'),genre:'—',region:t.region||'Non renseignée',color:colors[i%6],bpm:0,sponsored:t.partner}));
+const regions=[...new Set([...Object.keys(r.inventory||{}),...tracks.map(t=>t.region)])];
+return {tracks,GENRES:[],REGIONS:regions,COLORS:colors,inventory:r.inventory,totals:r.totals,cpp:DEMO.cpp,real:true};
+}
 const fmt=n=>Math.round(n).toLocaleString('fr'),pct=x=>(x>=0?'▲ +':'▼ ')+Math.abs(Math.round(x*100))+' %';
 let tab='cote',genre='Tous',region='Toutes';
 function spark(arr,color){
@@ -77,23 +84,24 @@ const pts=arr.map((v,i)=>(i/(arr.length-1)*w).toFixed(1)+','+(h-2-(v-min)/((max-
 return '<svg class="spark" viewBox="0 0 '+w+' '+h+'"><polyline fill="none" stroke="'+color+'" stroke-width="1.8" stroke-linejoin="round" points="'+pts+'"/></svg>';
 }
 function kpis(){
-const tot7=D.tracks.reduce((a,t)=>a+t.last7,0),prev7=D.tracks.reduce((a,t)=>a+t.prev7,0),min7=Math.round(tot7*2.6),conv=D.tracks.reduce((a,t)=>a+t.conversions,0),ob=D.tracks.reduce((a,t)=>a+t.onBeat*t.last7,0)/tot7;
-$('kpis').innerHTML=[['PISTES JOUÉES · 7 J',fmt(tot7),'<span class="'+(tot7>=prev7?'up':'down')+'">'+pct((tot7-prev7)/prev7)+'</span> vs 7 j précédents'],['MINUTES D’ÉCOUTE RÉELLE',fmt(min7),'≈ 2,6 min par piste jouée'],['TAUX DANS LE TEMPO',Math.round(ob*100)+' %','taps calés sur le beat'],['CONVERSIONS · 30 J',fmt(conv),'pré-saves, billets, disques']].map(k=>'<div class="kpi"><span>'+k[0]+'</span><b>'+k[1]+'</b><small>'+k[2]+'</small></div>').join('');
+const tot7=D.tracks.reduce((a,t)=>a+t.last7,0),prev7=D.tracks.reduce((a,t)=>a+t.prev7,0),min7=D.totals?D.totals.minutes7:Math.round(tot7*2.6),conv=D.tracks.reduce((a,t)=>a+t.conversions,0),ob=D.totals?D.totals.onBeat:(tot7?D.tracks.reduce((a,t)=>a+t.onBeat*t.last7,0)/tot7:0);
+$('kpis').innerHTML=[['PISTES JOUÉES · 7 J',fmt(tot7),(prev7?'<span class="'+(tot7>=prev7?'up':'down')+'">'+pct((tot7-prev7)/prev7)+'</span> vs 7 j précédents':'première semaine')],['MINUTES D’ÉCOUTE RÉELLE',fmt(min7),tot7?'≈ '+(min7/tot7).toFixed(1).replace('.',',')+' min par piste jouée':'—'],['TAUX DANS LE TEMPO',Math.round(ob*100)+' %','taps calés sur le beat'],['CONVERSIONS · 30 J',fmt(conv),'pré-saves, billets, disques']].map(k=>'<div class="kpi"><span>'+k[0]+'</span><b>'+k[1]+'</b><small>'+k[2]+'</small></div>').join('');
 }
 function movers(){
-const up=[...D.tracks].sort((a,b)=>b.delta-a.delta).slice(0,2),down=[...D.tracks].sort((a,b)=>a.delta-b.delta)[0];
-$('movers').innerHTML=[...up,down].map(t=>'<div class="mover"><div><b><span class="sw" style="background:'+t.color+'"></span>'+t.title+'</b><small>'+t.artist+' · '+t.genre+' · '+t.region+'</small></div><div class="delta '+(t.delta>=0?'up':'down')+'">'+pct(t.delta)+'</div></div>').join('');
+const up=[...D.tracks].sort((a,b)=>b.delta-a.delta).slice(0,2),down=D.tracks.length>2?[...D.tracks].sort((a,b)=>a.delta-b.delta)[0]:null;
+$('movers').innerHTML=[...up,...(down?[down]:[])].map(t=>'<div class="mover"><div><b><span class="sw" style="background:'+t.color+'"></span>'+t.title+'</b><small>'+t.artist+' · '+t.genre+' · '+t.region+'</small></div><div class="delta '+(t.delta>=0?'up':'down')+'">'+pct(t.delta)+'</div></div>').join('');
 }
 function filters(){
 const g=['Tous',...D.GENRES],r=['Toutes',...D.REGIONS];
-$('filters').innerHTML=(tab==='mine'?'':g.map(x=>'<button class="chip'+(x===genre?' on':'')+'" data-g="'+x+'">'+x+'</button>').join('')+'<span style="width:12px"></span>'+r.map(x=>'<button class="chip'+(x===region?' on':'')+'" data-r="'+x+'">'+x+'</button>').join(''));
+$('filters').innerHTML=(tab==='mine'?'':(REAL?'<button class="chip'+(mode==='real'?' on':'')+'" data-mode="real">Données réelles</button><button class="chip'+(mode==='demo'?' on':'')+'" data-mode="demo">Démo</button><span style="width:12px"></span>':'')+(D.GENRES.length?g.map(x=>'<button class="chip'+(x===genre?' on':'')+'" data-g="'+x+'">'+x+'</button>').join('')+'<span style="width:12px"></span>':'')+r.map(x=>'<button class="chip'+(x===region?' on':'')+'" data-r="'+x+'">'+x+'</button>').join(''));
+$('filters').querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;D=mode==='real'?adoptReal(REAL):DEMO;genre='Tous';region='Toutes';kpis();movers();render()});
 $('filters').querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{genre=b.dataset.g;render()});
 $('filters').querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{region=b.dataset.r;render()});
 }
 function rowsCote(){
-let list=D.tracks.filter(t=>(genre==='Tous'||t.genre===genre)&&(region==='Toutes'||t.region===region));
+let list=D.tracks.filter(t=>(genre==='Tous'||t.genre===genre)&&(region==='Toutes'||(t.regions?(t.regions[region]||0)>0:t.region===region)));
 list=tab==='early'?list.sort((a,b)=>b.early-a.early):list.sort((a,b)=>b.score-a.score);
-return list.map((t,i)=>'<tr><td class="rank">'+(i+1)+'</td><td class="track"><b><span class="sw" style="background:'+t.color+'"></span>'+t.title+(t.sponsored?'<span class="tag sponsor">PARTENAIRE</span>':'')+(tab==='early'?'<span class="tag early">'+t.early+' DÉCOUVREURS</span>':'')+'</b><small>'+t.artist+' · '+t.type+' · '+t.genre+' · '+t.region+' · '+t.bpm+' BPM</small></td><td>'+spark(t.plays,t.color)+'</td><td class="delta '+(t.delta>=0?'up':'down')+'">'+pct(t.delta)+'</td><td class="num">'+fmt(t.last7)+'</td><td class="num">'+Math.round(t.onBeat*100)+' %</td><td class="num">'+fmt(t.shares)+'</td><td class="num">'+fmt(t.conversions)+'</td><td class="num grotesk" style="font-size:17px">'+fmt(t.score)+'</td></tr>').join('');
+return list.map((t,i)=>'<tr><td class="rank">'+(i+1)+'</td><td class="track"><b><span class="sw" style="background:'+t.color+'"></span>'+t.title+(t.sponsored?'<span class="tag sponsor">PARTENAIRE</span>':'')+(tab==='early'?'<span class="tag early">'+t.early+' DÉCOUVREURS</span>':'')+'</b><small>'+t.artist+' · '+t.type+(t.genre&&t.genre!=='—'?' · '+t.genre:'')+' · '+t.region+(t.bpm?' · '+t.bpm+' BPM':'')+(t.players?' · '+t.players+' joueur'+(t.players>1?'s':''):'')+'</small></td><td>'+spark(t.plays,t.color)+'</td><td class="delta '+(t.delta>=0?'up':'down')+'">'+pct(t.delta)+'</td><td class="num">'+fmt(t.last7)+'</td><td class="num">'+Math.round(t.onBeat*100)+' %</td><td class="num">'+fmt(t.shares)+'</td><td class="num">'+fmt(t.conversions)+'</td><td class="num grotesk" style="font-size:17px">'+fmt(t.score)+'</td></tr>').join('');
 }
 function rowsMine(){
 let plays=[];try{plays=JSON.parse(localStorage.getItem('chroma-plays')||'[]')}catch(e){}
@@ -112,9 +120,11 @@ tb.innerHTML=html;
 const e=$('empty');e.style.display=html?'none':'block';
 e.textContent=tab==='mine'?'Aucune partie enregistrée sur cet appareil pour l’instant. Jouez une piste dans CHROMA : elle apparaîtra ici, et chargez un vrai titre via « Scène » pour qu’il compte comme écoute prouvée.':'Aucun titre pour ce filtre.';
 $('demoBanner').style.display=tab==='mine'?'none':'flex';
+if(mode==='real'){$('demoBanner').innerHTML='<b style="color:var(--accent)">DONNÉES RÉELLES</b><span>'+fmt(REAL.rawPlays30)+' niveaux joués sur 30 jours, agrégés par le serveur MUSICBOX. Seuls les niveaux terminés ou joués au-delà de 50 % comptent. Mis à jour le '+new Date(REAL.generatedAt).toLocaleString('fr')+'.</span>';$('demoBanner').style.borderColor='#1f5a3f';$('demoBanner').style.background='#0e1a13';$('demoBanner').style.color='#bfe8d0'}else{$('demoBanner').innerHTML='<b>DONNÉES DE DÉMONSTRATION</b><span>Ces artistes et ces chiffres sont inventés pour montrer l’interface.'+(REAL?' Des données réelles existent : cliquez « Données réelles ».':' La Cote réelle démarrera avec les écoutes du pilote.')+' Vos propres parties, elles, sont réelles (onglet « Vos écoutes »).</span>';$('demoBanner').style.borderColor='';$('demoBanner').style.background='';$('demoBanner').style.color=''}
 }
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;render()});
 kpis();movers();render();
+fetch('/api/cote').then(r=>r.ok?r.json():null).then(r=>{if(r&&r.real){REAL=r;mode='real';D=adoptReal(r);kpis();movers();render()}else if(r){REAL=null;render()}}).catch(()=>{});
 })();
 </script>
 </body>
