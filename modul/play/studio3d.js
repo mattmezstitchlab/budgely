@@ -45,7 +45,9 @@ function makeLabel(text,color){const c=document.createElement('canvas');c.width=
   const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.anisotropy=4;return t}
 
 const INSTC=S.INST.map(x=>new T.Color(x.c));
-export function refresh(){for(let f=0;f<6;f++){const t=S.TYPES[f],lv=S.proj.pads[t];for(let i=0;i<16;i++){const p=pads[f][i],l=lv[i],c=INSTC[S.PADS[i][0]];const mat=p.mesh.material;
+const DIM=new T.Color(0x1a1a1f);
+export function refresh(){const used=S.used?S.used():null;for(let f=0;f<6;f++){const t=S.TYPES[f],lv=S.proj.pads[t],off=used&&!used.includes(t);for(let i=0;i<16;i++){const p=pads[f][i],l=off?0:lv[i],c=INSTC[S.PADS[i][0]];const mat=p.mesh.material;
+  if(off){mat.color.copy(DIM);mat.emissive.set(0);mat.emissiveIntensity=0;p.label.material.map=labelTex[i];p.label.material.opacity=.14;p.label.material.needsUpdate=true;continue}
   /* éteint : gris mat, nom en blanc discret · présent : couleur pleine, nom sombre · fort : couleur + légère lueur */
   const lm=p.label.material;
   if(l===0){mat.color.copy(OFF);mat.emissive.set(0);mat.emissiveIntensity=0;lm.map=labelTex[i];lm.opacity=.45}

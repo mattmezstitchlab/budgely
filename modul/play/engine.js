@@ -1,6 +1,10 @@
 /* MODUL — moteur musical partagé avec CHROMA (styles, samples, synthèse, structure). Généré depuis play/index.html, adapté. */
 const INST=[{n:'Batterie',c:'#ff4f5e'},{n:'Basse',c:'#a78bfa'},{n:'Accords',c:'#4cc9f0'},{n:'Mélodie',c:'#00ed8b'},{n:'Percussions',c:'#ffd166'},{n:'Voix',c:'#ff5fa2'}];
 const FORM=[['Intro',4],['Couplet',8],['Pré-refrain',4],['Refrain',8],['Couplet',8],['Pré-refrain',4],['Refrain',8],['Pont',8],['Refrain',8],['Final',8]];
+const BASE_FORM=FORM.map(x=>x.slice());
+/* structure modifiable par projet (jingle de 4 mesures, film de 40…) : on remplace le contenu, pas la référence */
+function setForm(f){const ok=Array.isArray(f)&&f.length&&f.every(x=>Array.isArray(x)&&NEED_TYPES.includes(x[0])&&x[1]>=1);FORM.splice(0,FORM.length,...(ok?f.map(x=>[x[0],Math.min(64,Math.round(x[1]))]):BASE_FORM.map(x=>x.slice())));return FORM}
+const NEED_TYPES=['Intro','Couplet','Pré-refrain','Refrain','Pont','Final'];
 const NEED={Intro:[2],Couplet:[0,1],'Pré-refrain':[0,1,2],Refrain:[0,1,2,3],Pont:[2,3,5],Final:[0,1,2,3,4,5]};
 const PROG={
   minor:{Intro:[0,0,5,5],Couplet:[0,5,2,6],'Pré-refrain':[3,3,6,6],Refrain:[5,6,0,0],Pont:[2,6,3,4],Final:[5,6,0,0]},

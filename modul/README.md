@@ -15,6 +15,7 @@ modul/
 ├── cote/               La Cote — classement par écoute prouvée (démo → réel dès qu'il y a des données)
 ├── studio/             Le Studio — régie partenaires (coût par piste jouée, inventaire réel si disponible)
 ├── assets/             CSS partagé, données de démonstration (étiquetées comme telles)
+├── VEILLE.md           analyse des générateurs de musique (Suno, Udio, Mubert, Soundraw, Beatoven, Endel…) et ce que MODUL en retient
 └── server/             API + statique : node modul/server/server.mjs  (Node ≥ 22.13, SQLite intégré)
 ```
 
@@ -45,6 +46,8 @@ Règles : un niveau abandonné avant 50 % ne compte pas ; identifiant joueur ano
 - Simulation d'équilibrage : bot glouton ~100 % jusqu'au niveau 20, 76–93 % ensuite.
 
 ## MODUL Studio (`play/`)
+
+**Le brief d'abord.** À l'ouverture : « Que veux-tu créer ? » — 12 usages (jingle, publicité, générique, film, sport, yoga, méditation, berceuse, podcast, jeu vidéo, concentration, chanson) × 6 ambiances. Chaque usage pose une structure (`setForm`, de 4 à 68 mesures), un tempo, un mode, un style et un gabarit de pads ; une durée demandée (« 20 secondes ») étire ou resserre les sections. Voir `VEILLE.md` pour l'analyse des outils existants et ce qu'on en a retenu.
 
 Le studio n'ajoute pas d'interface de DAW : tout est dans le cube. Une face = une section (Intro, Couplet, Pré-refrain, Refrain, Pont, Final), une rangée = un instrument, un pad = éteint / présent / fort. L'arrangement (`arr`, 6 énergies par section) et les réglages (`over` : mode, tonalité, tempo) sont envoyés au moteur et stockés sur le serveur (colonne `studio`, exclue des classements). Les anciens morceaux de jeu encore en local s'ouvrent aussi : leurs énergies deviennent des pads (`arrangementFrom`).
 

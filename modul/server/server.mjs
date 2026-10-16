@@ -46,7 +46,9 @@ try{db.exec('ALTER TABLE tracks ADD COLUMN studio TEXT')}catch(e){} /* arrangeme
 function studioOf(b){if(!b.arr||typeof b.arr!=='object')return null;const arr={};for(const [k,v] of Object.entries(b.arr)){if(!Array.isArray(v)||v.length!==6)continue;arr[String(k).slice(0,20)]=v.map(x=>Math.max(0,Math.min(1,Number(x)||0)))}
   const o=b.over&&typeof b.over==='object'?b.over:{};const over={};if(o.mode==='minor'||o.mode==='major')over.mode=o.mode;if(o.root!=null)over.root=Math.max(0,Math.min(11,Number(o.root)|0));if(o.bpm)over.bpm=Math.max(60,Math.min(200,Number(o.bpm)|0));
   const pads={};if(b.pads&&typeof b.pads==='object')for(const [k,v] of Object.entries(b.pads)){if(Array.isArray(v)&&v.length===16)pads[String(k).slice(0,20)]=v.map(x=>Math.max(0,Math.min(2,Number(x)|0)))}
-  return JSON.stringify({arr,over,pads})}
+  const TYPES=['Intro','Couplet','Pré-refrain','Refrain','Pont','Final'];let form=null;if(Array.isArray(b.form)&&b.form.length<=24){form=b.form.filter(x=>Array.isArray(x)&&TYPES.includes(x[0])).map(x=>[x[0],Math.max(1,Math.min(64,Number(x[1])|0))]);if(!form.length)form=null}
+  const use=typeof b.use==='string'?b.use.slice(0,20):null,mood=typeof b.mood==='string'?b.mood.slice(0,20):null;
+  return JSON.stringify({arr,over,pads,form,use,mood})}
 const insTrack=db.prepare(`INSERT INTO tracks(ts,player,name,seed,bpm,key_name,bars,seconds,score,sections,max_combo,events,style,daily,studio) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
 const selTop=db.prepare(`SELECT id,ts,player,name,seed,bpm,key_name keyName,bars,seconds,score,sections,max_combo maxCombo,style,daily FROM tracks WHERE ts>=? AND studio IS NULL ORDER BY bars DESC, score DESC LIMIT ?`);
 const selDaily=db.prepare(`SELECT id,ts,player,name,seed,bpm,key_name keyName,bars,seconds,score,sections,max_combo maxCombo,style,daily FROM tracks WHERE daily=? AND studio IS NULL ORDER BY bars DESC, score DESC LIMIT ?`);
