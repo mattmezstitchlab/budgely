@@ -7,7 +7,7 @@
 <title>MODUL — Un cube. Six faces. Un morceau.</title>
 <meta name="description" content="MODUL : un module unique, un cube dont chaque face est une section du morceau. Suis l'onde du chef d'orchestre, trace la phrase, fais durer la musique. Vrais instruments, export MIDI et WAV.">
 <style>
-:root{--c0:#ff7a3d;--c1:#a78bfa;--c2:#4cc9f0;--c3:#00ed8b;--c4:#ffd166;--c5:#ff5fa2;--bt:.517s;
+:root{--c0:#ff4f5e;--c1:#a78bfa;--c2:#4cc9f0;--c3:#00ed8b;--c4:#ffd166;--c5:#ff5fa2;--bt:.517s;
   --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Helvetica Neue",Arial,sans-serif}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -111,7 +111,7 @@ footer a:hover{color:#f5f5f7}
     <h2 class="reveal">Le studio, c’est le cube.</h2>
     <p class="sub muted reveal">Pas de timeline, pas de pistes à faire défiler. Les faces sont les sections, les rangées sont les instruments, et le chef d’orchestre au centre comprend ce que tu lui demandes.</p>
     <div class="grid reveal">
-      <div><b>Faces</b><span>Intro, couplet, refrain, pont, final : tu tournes le cube, tu es dans la section.</span></div>
+      <div><b>Faces</b><span>Intro, couplet, refrain, pont, final. Tu attrapes le cube en 3D, tu le retournes : tu es dans la section.</span></div>
       <div><b>Rangées</b><span>Batterie, basse, accords, mélodie. Un pad : éteint, présent, fort.</span></div>
       <div><b>Chef d’orchestre</b><span>« Ajoute une mélodie au refrain. » « Plus sobre dans le couplet. » « 84 BPM. »</span></div>
       <div><b>Sortie</b><span>Lecture, MIDI, WAV, et retour dans le jeu : chaque partie jouée s’ouvre dans le studio.</span></div>
@@ -143,7 +143,7 @@ footer a:hover{color:#f5f5f7}
 <script>
 /* cube de démonstration : 6 faces, pads qui s'allument au tempo, onde causale */
 (function(){const TF=['rotateY(0deg)','rotateY(90deg)','rotateY(180deg)','rotateY(-90deg)','rotateX(90deg)','rotateX(-90deg)'];
-const C=['#ff7a3d','#ff7a3d','#ffd166','#ff7a3d','#a78bfa','#a78bfa','#a78bfa','#a78bfa','#4cc9f0','#4cc9f0','#4cc9f0','#4cc9f0','#00ed8b','#00ed8b','#00ed8b','#ff5fa2'];
+const C=['#ff4f5e','#ff4f5e','#ffd166','#ff4f5e','#a78bfa','#a78bfa','#a78bfa','#a78bfa','#4cc9f0','#4cc9f0','#4cc9f0','#4cc9f0','#00ed8b','#00ed8b','#00ed8b','#ff5fa2'];
 const PH=[[8,11,8,10],[0,4,1,5,0,6,1,4],[0,8,4,1,0,9,5,12],[0,4,8,12,1,5,9,13],[11,12,15,13],[0,4,8,12,1,5,9,15]];
 const cube=document.getElementById('cube');const faces=[];
 for(let f=0;f<6;f++){const d=document.createElement('div');d.className='face';d.style.setProperty('--tf',TF[f]);for(let i=0;i<16;i++){const p=document.createElement('i');p.style.setProperty('--c',C[i]);d.appendChild(p)}const e=document.createElement('em');d.appendChild(e);cube.appendChild(d);faces.push(d)}

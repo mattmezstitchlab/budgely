@@ -7,6 +7,8 @@ modul/
 ├── index.html          MODUL — landing (le module, les gestes, la musique, le studio, les exports)
 ├── play/               MODUL — le jeu : un cube, un tempo, compose le morceau le plus long
 │   ├── studio.html     MODUL Studio — le cube comme station de travail : faces = sections, rangées = instruments, pads à 3 niveaux, chef d'orchestre en français (règles, pas d'IA), lecture, MIDI, WAV
+│   ├── studio3d.js     la vue 3D du studio : cube manipulable (glisser, inertie, retombée sur la face), pads en relief, lueur
+│   ├── vendor/         three.bundle.js = three.js r186 (MIT) + RoundedBoxGeometry, EffectComposer, RenderPass, UnrealBloomPass, OutputPass — bundle esbuild, seule dépendance tierce du projet
 │   └── engine.js       moteur partagé (jeu + studio) : description du morceau, conduite des voix, rendu hors-ligne, export
 │   └── samples/        vrais sons (CC0 : 808, kits Sonic Pi, percussions ; CC BY 3.0 : piano, basse, guitare, xylophone) — voir LICENSES.md
 ├── scene/              version « scène » : jouer sur un vrai titre d'artiste (+ chroma-analysis.js : tempo, premier temps, tonalité)
@@ -45,6 +47,8 @@ Règles : un niveau abandonné avant 50 % ne compte pas ; identifiant joueur ano
 ## MODUL Studio (`play/studio.html`)
 
 Le studio n'ajoute pas d'interface de DAW : c'est le même cube que le jeu. Une face = une section (Intro, Couplet, Pré-refrain, Refrain, Pont, Final), une rangée = un instrument, un pad = éteint / présent / fort. L'arrangement (`arr`, 6 énergies par section) et les réglages (`over` : mode, tonalité, tempo) sont envoyés au moteur et stockés sur le serveur (colonne `studio`, exclue des classements). Un morceau joué s'ouvre dans le studio : ses énergies de jeu deviennent des pads (`arrangementFrom`).
+
+La vue est en vraie 3D (WebGL, three.js) : on attrape le cube au doigt ou à la souris, on le retourne, il retombe sur la face la plus proche ; un tap sur un pad l'allume. Sans WebGL, la page reste utilisable (chef d'orchestre, transport, exports). Pour régénérer le bundle : `npx esbuild entry.js --bundle --minify --format=esm --outfile=play/vendor/three.bundle.js` avec un `entry.js` qui ré-exporte `three` et les cinq addons listés ci-dessus.
 
 Le « chef d'orchestre » est un analyseur de commandes en français **à base de règles** (instruments, sections, plus fort / moins fort / retire, N bpm, mineur / majeur, styles, « surprends-moi », « vide ») — pas un modèle de langage. L'interface est prête à en brancher un : une fonction `conductor(texte)` qui modifie `proj.pads` / `proj.over`.
 

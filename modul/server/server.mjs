@@ -14,6 +14,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {DatabaseSync} from 'node:sqlite';
+import zlib from 'node:zlib';
 
 const __dirname=path.dirname(fileURLToPath(import.meta.url));
 const ROOT=path.resolve(__dirname,'..');
@@ -138,8 +139,10 @@ let file=path.normalize(path.join(ROOT,decodeURIComponent(p)));
 if(!file.startsWith(ROOT)||file.startsWith(path.join(ROOT,'server')))return send(res,403,'Interdit','text/plain');
 if(fs.existsSync(file)&&fs.statSync(file).isDirectory())file=path.join(file,'index.html');
 if(!fs.existsSync(file))return send(res,404,'Introuvable','text/plain');
-res.writeHead(200,{'Content-Type':MIME[path.extname(file)]||'application/octet-stream','Cache-Control':/\/samples\//.test(file)?'public, max-age=31536000, immutable':'no-cache'});
-fs.createReadStream(file).pipe(res);
+const ext=path.extname(file),headers={'Content-Type':MIME[ext]||'application/octet-stream','Cache-Control':/\/samples\/|\/vendor\//.test(file)?'public, max-age=31536000, immutable':'no-cache'};
+const gz=/^\.(js|mjs|html|css|json|svg|md|mid)$/.test(ext)&&/\bgzip\b/.test(req.headers['accept-encoding']||'');
+if(gz){headers['Content-Encoding']='gzip';headers['Vary']='Accept-Encoding';res.writeHead(200,headers);fs.createReadStream(file).pipe(zlib.createGzip({level:6})).pipe(res)}
+else{res.writeHead(200,headers);fs.createReadStream(file).pipe(res)}
 }catch(e){send(res,500,{error:'erreur serveur'})}
 });
 const PORT=Number(process.env.PORT||8090),HOST=process.env.HOST||'0.0.0.0';

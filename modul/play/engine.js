@@ -1,5 +1,5 @@
 /* MODUL — moteur musical partagé avec CHROMA (styles, samples, synthèse, structure). Généré depuis play/index.html, adapté. */
-const INST=[{n:'Batterie',c:'#ff7a3d'},{n:'Basse',c:'#a78bfa'},{n:'Accords',c:'#4cc9f0'},{n:'Mélodie',c:'#00ed8b'},{n:'Percussions',c:'#ffd166'},{n:'Voix',c:'#ff5fa2'}];
+const INST=[{n:'Batterie',c:'#ff4f5e'},{n:'Basse',c:'#a78bfa'},{n:'Accords',c:'#4cc9f0'},{n:'Mélodie',c:'#00ed8b'},{n:'Percussions',c:'#ffd166'},{n:'Voix',c:'#ff5fa2'}];
 const FORM=[['Intro',4],['Couplet',8],['Pré-refrain',4],['Refrain',8],['Couplet',8],['Pré-refrain',4],['Refrain',8],['Pont',8],['Refrain',8],['Final',8]];
 const NEED={Intro:[2],Couplet:[0,1],'Pré-refrain':[0,1,2],Refrain:[0,1,2,3],Pont:[2,3,5],Final:[0,1,2,3,4,5]};
 const PROG={
@@ -17,7 +17,7 @@ const TONAL={piano:{dir:'piano',notes:{C3:48,Fs3:54,C4:60,Fs4:66,C5:72}},ebass:{
 const STYLES={
   pop:  {n:'Pop',   d:'Piano, guitare, batterie acoustique', g:'linear-gradient(90deg,#4cc9f0,#00ed8b)', bpm:[104,118],minorP:.45,kit:'ac', bass:'ebass',chords:'piano',lead:'guitar',voice:'choir',  perc:['808_sh','pc_clap','808_rim'],swing:0,  half:false,seventh:false},
   house:{n:'House', d:'Kick droit, piano stabs, voix coupées',g:'linear-gradient(90deg,#a78bfa,#ff5fa2)', bpm:[122,126],minorP:.6, kit:'el', bass:'synth',chords:'stab', lead:'pluck', voice:'formant',perc:['808_sh','808_cb','808_rim'],swing:0,  half:false,seventh:true},
-  trap: {n:'Trap',  d:'808, hats rapides, cloches',           g:'linear-gradient(90deg,#ff7a3d,#ffd166)', bpm:[70,78],  minorP:.9, kit:'808',bass:'sub',  chords:'dark', lead:'bells', voice:'choir',  perc:['808_rim','pc_snap','808_cb'],swing:0,  half:true, seventh:false},
+  trap: {n:'Trap',  d:'808, hats rapides, cloches',           g:'linear-gradient(90deg,#ff4f5e,#ffd166)', bpm:[70,78],  minorP:.9, kit:'808',bass:'sub',  chords:'dark', lead:'bells', voice:'choir',  perc:['808_rim','pc_snap','808_cb'],swing:0,  half:true, seventh:false},
   lofi: {n:'Lo-fi', d:'Accords jazz, souffle, douceur',       g:'linear-gradient(90deg,#ffd166,#a78bfa)', bpm:[76,88],  minorP:.5, kit:'ac', bass:'ebass',chords:'piano7',lead:'guitar',voice:'choir', perc:['pc_snap','pc_ta','808_sh'], swing:.58,half:false,seventh:true,tex:'tx_hiss',lp:3800}
 };
 function filesFor(st){const S=STYLES[st];const f=new Set(Object.values(KITS[S.kit]));S.perc.forEach(x=>f.add(x));if(S.voice==='choir')f.add('tx_choir');if(S.tex)f.add(S.tex);
