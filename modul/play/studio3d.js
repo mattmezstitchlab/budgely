@@ -10,15 +10,15 @@ const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---------- rendu ---------- */
 let renderer;try{renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'})}catch(e){S.noWebGL();throw e}
-renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.setClearColor(0x000000,1);renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.setClearColor(0x000000,1);renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1;
 renderer.domElement.style.cssText='position:absolute;inset:0;width:100%;height:100%;touch-action:none;outline:0';renderer.domElement.tabIndex=0;renderer.domElement.setAttribute('aria-label','Cube MODUL : glisse pour tourner, tape un pad pour l’activer');
 host.appendChild(renderer.domElement);
 const scene=new T.Scene();
 const camera=new T.PerspectiveCamera(32,1,.1,50);camera.position.set(0,0,7.2);
 scene.add(new T.HemisphereLight(0xffffff,0x202028,.9));
-const key=new T.DirectionalLight(0xffffff,2.2);key.position.set(3,5,6);scene.add(key);
+const key=new T.DirectionalLight(0xffffff,1.8);key.position.set(3,5,6);scene.add(key);
 const rim=new T.DirectionalLight(0x9db4ff,1.1);rim.position.set(-5,-2,-4);scene.add(rim);
-const fill=new T.PointLight(0xffffff,40,20,2);fill.position.set(-3,3,5);scene.add(fill);
+const fill=new T.PointLight(0xffffff,25,20,2);fill.position.set(-3,3,5);scene.add(fill);
 
 /* fond : dégradé doux dessiné dans la scène (le post-traitement ne gère pas bien la transparence) */
 (function(){const c=document.createElement('canvas');c.width=c.height=512;const x=c.getContext('2d');const g=x.createRadialGradient(256,200,10,256,256,340);g.addColorStop(0,'#1b1b21');g.addColorStop(.55,'#0b0b0d');g.addColorStop(1,'#000');x.fillStyle=g;x.fillRect(0,0,512,512);
@@ -33,7 +33,7 @@ root.add(body);
 const FACE_ROT=[[0,0,0],[0,Math.PI/2,0],[0,Math.PI,0],[0,-Math.PI/2,0],[-Math.PI/2,0,0],[Math.PI/2,0,0]].map(e=>new T.Quaternion().setFromEuler(new T.Euler(...e)));
 const padGeo=new T.RoundedBoxGeometry(PAD,PAD,.09,3,.05);
 const OFF=new T.Color(0x2b2b32),OFF_E=new T.Color(0x000000);
-const labelTex=S.PADS.map(p=>makeLabel(p[2]));
+const labelTex=S.PADS.map(p=>makeLabel(p[2],'#ffffff')),labelDark=S.PADS.map(p=>makeLabel(p[2],'#0b0b0f'));
 const pads=[];/* pads[face][i] = {mesh,label,face,i} */
 const labelGeo=new T.PlaneGeometry(PAD*.92,PAD*.92);
 for(let f=0;f<6;f++){const g=new T.Group();g.quaternion.copy(FACE_ROT[f]);root.add(g);pads[f]=[];
@@ -41,18 +41,21 @@ for(let f=0;f<6;f++){const g=new T.Group();g.quaternion.copy(FACE_ROT[f]);root.a
     m.position.set((col-1.5)*GAP,(1.5-row)*GAP,SIZE/2+.03);m.userData={face:f,i};g.add(m);
     const l=new T.Mesh(labelGeo,new T.MeshBasicMaterial({map:labelTex[i],transparent:true,opacity:.5,depthWrite:false,toneMapped:false}));l.position.set(m.position.x,m.position.y,m.position.z+.062);g.add(l);
     pads[f][i]={mesh:m,label:l,face:f,i,scale:1}}}
-function makeLabel(text){const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');x.clearRect(0,0,256,256);x.fillStyle='#fff';x.font='700 58px -apple-system,BlinkMacSystemFont,Inter,Helvetica,Arial,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(text.toUpperCase(),128,132);
+function makeLabel(text,color){const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');x.clearRect(0,0,256,256);x.fillStyle=color;x.font='700 58px -apple-system,BlinkMacSystemFont,Inter,Helvetica,Arial,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(text.toUpperCase(),128,132);
   const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.anisotropy=4;return t}
 
 const INSTC=S.INST.map(x=>new T.Color(x.c));
 export function refresh(){for(let f=0;f<6;f++){const t=S.TYPES[f],lv=S.proj.pads[t];for(let i=0;i<16;i++){const p=pads[f][i],l=lv[i],c=INSTC[S.PADS[i][0]];const mat=p.mesh.material;
-  if(l===0){mat.color.copy(OFF);mat.emissive.set(0);mat.emissiveIntensity=0;p.label.material.opacity=.42}
-  else if(l===1){mat.color.copy(c).multiplyScalar(.55);mat.emissive.copy(c);mat.emissiveIntensity=.35;p.label.material.opacity=.9}
-  else{mat.color.copy(c);mat.emissive.copy(c);mat.emissiveIntensity=1.6;p.label.material.opacity=1}}}}
+  /* éteint : gris mat, nom en blanc discret · présent : couleur pleine, nom sombre · fort : couleur + légère lueur */
+  const lm=p.label.material;
+  if(l===0){mat.color.copy(OFF);mat.emissive.set(0);mat.emissiveIntensity=0;lm.map=labelTex[i];lm.opacity=.45}
+  else if(l===1){mat.color.copy(c).multiplyScalar(.8);mat.emissive.copy(c);mat.emissiveIntensity=.1;lm.map=labelDark[i];lm.opacity=.8}
+  else{mat.color.copy(c);mat.emissive.copy(c);mat.emissiveIntensity=.55;lm.map=labelDark[i];lm.opacity=.9}
+  lm.needsUpdate=true}}}
 
 /* ---------- post-traitement : lueur des pads « fort » ---------- */
 const composer=new T.EffectComposer(renderer);composer.addPass(new T.RenderPass(scene,camera));
-const bloom=new T.UnrealBloomPass(new T.Vector2(1,1),reduce?.25:.55,.5,.9);composer.addPass(bloom);composer.addPass(new T.OutputPass());
+const bloom=new T.UnrealBloomPass(new T.Vector2(1,1),reduce?.1:.22,.25,.92);composer.addPass(bloom);composer.addPass(new T.OutputPass());
 
 /* ---------- taille ---------- */
 function resize(){const w=host.clientWidth||1,h=host.clientHeight||1;renderer.setSize(w,h,false);composer.setSize(w,h);camera.aspect=w/h;
