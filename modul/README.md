@@ -4,9 +4,10 @@ Plateforme de l'écoute prouvée. Un fichier HTML par page, zéro dépendance, u
 
 ```
 modul/
-├── index.html          MUSICBOX — landing (principe, mécanique, plateforme, artistes, économie, FAQ)
-├── modul/              MODUL — prototype « cube » : 6 faces = 6 sections, 16 agents par face, ondes causales du chef d'orchestre, tracé de phrases (engine.js partagé)
-├── play/               CHROMA — le jeu principal : un plateau, un tempo, compose le morceau le plus long
+├── index.html          MODUL — landing (le module, les gestes, la musique, le studio, les exports)
+├── play/               MODUL — le jeu : un cube, un tempo, compose le morceau le plus long
+│   ├── studio.html     MODUL Studio — le cube comme station de travail : faces = sections, rangées = instruments, pads à 3 niveaux, chef d'orchestre en français (règles, pas d'IA), lecture, MIDI, WAV
+│   └── engine.js       moteur partagé (jeu + studio) : description du morceau, conduite des voix, rendu hors-ligne, export
 │   └── samples/        vrais sons (CC0 : 808, kits Sonic Pi, percussions ; CC BY 3.0 : piano, basse, guitare, xylophone) — voir LICENSES.md
 ├── scene/              version « scène » : jouer sur un vrai titre d'artiste (+ chroma-analysis.js : tempo, premier temps, tonalité)
 ├── cote/               La Cote — classement par écoute prouvée (démo → réel dès qu'il y a des données)
@@ -40,6 +41,12 @@ Règles : un niveau abandonné avant 50 % ne compte pas ; identifiant joueur ano
 
 - `node` sur `scene/chroma-analysis.js` : 7 titres synthétiques 92–172 BPM, tempo ±0,02 %, premier temps ±10 ms.
 - Simulation d'équilibrage : bot glouton ~100 % jusqu'au niveau 20, 76–93 % ensuite.
+
+## MODUL Studio (`play/studio.html`)
+
+Le studio n'ajoute pas d'interface de DAW : c'est le même cube que le jeu. Une face = une section (Intro, Couplet, Pré-refrain, Refrain, Pont, Final), une rangée = un instrument, un pad = éteint / présent / fort. L'arrangement (`arr`, 6 énergies par section) et les réglages (`over` : mode, tonalité, tempo) sont envoyés au moteur et stockés sur le serveur (colonne `studio`, exclue des classements). Un morceau joué s'ouvre dans le studio : ses énergies de jeu deviennent des pads (`arrangementFrom`).
+
+Le « chef d'orchestre » est un analyseur de commandes en français **à base de règles** (instruments, sections, plus fort / moins fort / retire, N bpm, mineur / majeur, styles, « surprends-moi », « vide ») — pas un modèle de langage. L'interface est prête à en brancher un : une fonction `conductor(texte)` qui modifie `proj.pads` / `proj.over`.
 
 ## Pas encore réel
 

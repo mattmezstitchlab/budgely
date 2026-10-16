@@ -33,11 +33,12 @@ function api(path,opts){return fetch(path,opts).then(r=>r.ok?r.json():Promise.re
 let styleId=load('chroma-style','pop');if(!STYLES[styleId])styleId='pop';
 let offsetMs=load('chroma-offset',0);
 
-function describe(seed,st){
+function describe(seed,st,over={}){
   const S=STYLES[st]||STYLES.pop;const r=mulberry32(seed);
-  const mode=r()<S.minorP?'minor':'major';const root=Math.floor(r()*12);const bpm=S.bpm[0]+Math.floor(r()*(S.bpm[1]-S.bpm[0]+1));
+  let mode=r()<S.minorP?'minor':'major';let root=Math.floor(r()*12);let bpm=S.bpm[0]+Math.floor(r()*(S.bpm[1]-S.bpm[0]+1));
   const name=ADJ[Math.floor(r()*ADJ.length)]+' '+NOUN[Math.floor(r()*NOUN.length)];
-  return {seed,style:st,S,mode,root,bpm,name,keyName:KEYS[root]+(mode==='minor'?' mineur':' majeur')};
+  if(over.mode)mode=over.mode;if(over.root!=null)root=over.root;if(over.bpm)bpm=over.bpm;
+  return {seed,style:st,S,mode,root,bpm,name:over.name||name,keyName:KEYS[root]+(mode==='minor'?' mineur':' majeur')};
 }
 function sectionAt(bar){let b=bar,i=0,level=0;for(;;){const [type,len]=FORM[i];if(b<len)return {type,len,index:i,pos:b,level};b-=len;i++;if(i>=FORM.length){i=1;level++}}}
 const voicings=new Map();
@@ -176,7 +177,7 @@ const engine={on:false,desc:null,start:0,beat:.5,step:0,energy:[0,0,0,0,0,0],eve
 function engineStart(desc,opts={}){
   buildAudio();if(ctx.state==='suspended')ctx.resume();
   motifs.clear();voicings.clear();
-  Object.assign(engine,{on:true,desc,beat:60/desc.bpm,step:0,energy:[0,0,0,0,0,0],events:opts.events||[],evIdx:0,replay:!!opts.events,endBar:opts.bars||Infinity,ended:false});
+  Object.assign(engine,{on:true,desc,beat:60/desc.bpm,step:0,energy:[0,0,0,0,0,0],events:opts.events||[],evIdx:0,replay:!!opts.events,endBar:opts.bars||Infinity,ended:false,arr:opts.arr||null});
   engine.start=ctx.currentTime+.12;
   [busMusic,busDrum].forEach(b=>{b.gain.cancelScheduledValues(ctx.currentTime);b.gain.setValueAtTime(1,ctx.currentTime)});
   kitFilter.frequency.value=desc.S.lp||20000;busMusic.delay.forEach(dl=>dl.delayTime.value=engine.beat*.75);
@@ -196,8 +197,9 @@ function schedule(){
     if(bar>=engine.endBar){finalHit(t);engine.on=false;clearInterval(engine.timer);if(engine.tex){try{engine.tex.stop(t+.5)}catch(e){}engine.tex=null}return}
     if(sub===0&&beat===0&&bar>0&&bar%4===0&&engine.onBar)engine.onBar(bar);
     if(sub===0){const b=bar*4+beat;
-      if(engine.replay){while(engine.evIdx<engine.events.length&&engine.events[engine.evIdx][0]<=b){const e=engine.events[engine.evIdx++];addEnergy(e[1],tapEnergy(e[2],e[3]))}}
-      engine.energy=engine.energy.map(e=>e*.965)}
+      if(engine.arr){const a=engine.arr[sectionAt(bar).type]||[0,0,0,0,0,0];engine.energy=a.slice()}
+      else{if(engine.replay){while(engine.evIdx<engine.events.length&&engine.events[engine.evIdx][0]<=b){const e=engine.events[engine.evIdx++];addEnergy(e[1],tapEnergy(e[2],e[3]))}}
+      engine.energy=engine.energy.map(e=>e*.965)}}
     playStep(k,t,bar,beat,sub);
     engine.step++;
   }
@@ -261,18 +263,18 @@ function finalHit(t){const d=engine.desc,ch=chordOf(d,0);drum('bd',t,.9,d.S);dru
    Retourne {buffer:AudioBuffer, notes:[...]} ; notes alimente l'export MIDI. */
 async function renderTrack(t,onProgress){
   const st=STYLES[t.style]?t.style:'pop';if(!loaded.has(st))await loadStyle(st);
-  const desc=describe(t.seed,st),beat=60/desc.bpm,sr=44100,len=Math.ceil((t.bars*4*beat+3.2)*sr);
+  const desc=describe(t.seed,st,t.over||{}),beat=60/desc.bpm,sr=44100,len=Math.ceil((t.bars*4*beat+3.2)*sr);
   const OAC=window.OfflineAudioContext||window.webkitOfflineAudioContext;const off=new OAC(2,len,sr);
   const saved={ctx,master,comp,busDrum,kitFilter,busMusic,busSend,verb,noise,engine:{...engine,energy:engine.energy.slice()}};
   const wasOn=engine.on;clearInterval(engine.timer);engine.on=false;
   ctx=null;buildAudio(off);
   motifs.clear();voicings.clear();REC.on=true;REC.notes=[];
-  Object.assign(engine,{on:true,offline:true,desc,beat,step:0,energy:[0,0,0,0,0,0],events:t.events||[],evIdx:0,replay:true,endBar:t.bars,start:.1,onBar:null,tex:null});
+  Object.assign(engine,{on:true,offline:true,desc,beat,step:0,energy:[0,0,0,0,0,0],events:t.events||[],evIdx:0,replay:true,endBar:t.bars,start:.1,onBar:null,tex:null,arr:t.arr||null});
   [busMusic,busDrum].forEach(b=>b.gain.setValueAtTime(1,0));kitFilter.frequency.value=desc.S.lp||20000;busMusic.delay.forEach(dl=>dl.delayTime.value=beat*.75);
   if(desc.S.tex&&SMP[desc.S.tex]){const s=ctx.createBufferSource(),g=ctx.createGain();s.buffer=SMP[desc.S.tex];s.loop=true;g.gain.value=.14;s.connect(g);g.connect(busDrum);s.start(.1);s.stop(t.bars*4*beat+.1)}
   for(;;){const k=engine.step,tt=engine.start+k*beat/4,bar=k>>4,bt=(k>>2)&3,sub=k&3;
     if(bar>=t.bars){finalHit(tt);break}
-    if(sub===0){const b=bar*4+bt;while(engine.evIdx<engine.events.length&&engine.events[engine.evIdx][0]<=b){const e=engine.events[engine.evIdx++];addEnergy(e[1],tapEnergy(e[2],e[3]))}engine.energy=engine.energy.map(e=>e*.965)}
+    if(sub===0){if(engine.arr){engine.energy=(engine.arr[sectionAt(bar).type]||[0,0,0,0,0,0]).slice()}else{const b=bar*4+bt;while(engine.evIdx<engine.events.length&&engine.events[engine.evIdx][0]<=b){const e=engine.events[engine.evIdx++];addEnergy(e[1],tapEnergy(e[2],e[3]))}engine.energy=engine.energy.map(e=>e*.965)}}
     playStep(k,tt,bar,bt,sub);engine.step++;
     if(onProgress&&k%64===0){onProgress(bar/t.bars);await new Promise(r=>setTimeout(r,0))}}
   const notes=REC.notes;REC.on=false;REC.notes=[];
@@ -305,3 +307,9 @@ function midiBlob(notes,desc,bars){
   const bytes=[...chunk('MThd',head)];tracks.forEach(tr=>bytes.push(...chunk('MTrk',tr)));
   return new Blob([new Uint8Array(bytes)],{type:'audio/midi'})}
 function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}
+
+/* Reconstitue, sans audio, l'énergie moyenne de chaque instrument par type de section à partir du journal des tapes. */
+function arrangementFrom(events,bars){const acc={},n={};let e=[0,0,0,0,0,0],i=0;
+  for(let b=0;b<bars*4;b++){while(i<events.length&&events[i][0]<=b){const ev=events[i++];e[ev[1]]=Math.min(1,e[ev[1]]+tapEnergy(ev[2],ev[3]))}e=e.map(x=>x*.965);
+    const type=sectionAt(Math.floor(b/4)).type;acc[type]=acc[type]||[0,0,0,0,0,0];n[type]=(n[type]||0)+1;e.forEach((x,k)=>acc[type][k]+=x)}
+  const out={};for(const t in acc)out[t]=acc[t].map(x=>Math.round(x/n[t]*100)/100);return out}

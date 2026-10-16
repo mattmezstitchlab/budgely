@@ -148,7 +148,7 @@ h1.title{font-size:34px;font-weight:700;letter-spacing:-.035em;line-height:1.05}
   <div class="actions"><button class="btn" id="btnReplay">Réécouter</button><button class="btn ghost" id="btnAgain">Rejouer</button></div>
   <div class="rank" id="rank"></div>
   <div class="sheetinfo" id="sheet"></div>
-  <div class="actions" style="margin-top:18px"><button class="btn ghost small" id="btnMidi">MIDI</button><button class="btn ghost small" id="btnWav">WAV</button><button class="btn ghost small" id="btnShare">Partager</button></div>
+  <div class="actions" style="margin-top:18px"><button class="btn ghost small" id="btnMidi">MIDI</button><button class="btn ghost small" id="btnWav">WAV</button><button class="btn ghost small" id="btnStudio">Studio</button><button class="btn ghost small" id="btnShare">Partager</button></div>
   <div class="small" id="exportInfo" style="margin-top:10px;height:18px;font-size:13px;color:var(--mute)"></div>
 </section>
 
@@ -310,7 +310,7 @@ let current=null,replaying=false;
 function coverOf(t){const r=mulberry32((t.seed>>>0)+11);const a=Math.floor(r()*6),b=(a+1+Math.floor(r()*4))%6,c=(b+1+Math.floor(r()*3))%6,ang=Math.floor(r()*360);return `linear-gradient(${ang}deg,${INST[a].c},${INST[b].c} 55%,${INST[c].c})`}
 function structureOf(bars){const out=[];let b=0;while(b<bars){const s=sectionAt(b);const len=Math.min(s.len-s.pos,bars-b);out.push({type:s.type,level:s.level,len});b+=len}return out}
 function showTrack(t,fresh){show('end');$('cover').style.setProperty('--cover',coverOf(t));$('cover').style.setProperty('--beat',(60/t.bpm)+'s');$('tName').textContent=t.name;
-  const st=STYLES[t.style]?t.style:'pop',d=describe(t.seed,st);
+  const st=STYLES[t.style]?t.style:'pop',d=describe(t.seed,st,t.over||{});
   $('tMeta').innerHTML=`<b>${fmt(t.seconds)}</b> · ${t.bars} mesures · ${STYLES[st].n}${t.daily?' · module du '+t.daily:''}<br>${t.keyName} · ${t.bpm} BPM · ${Number(t.score).toLocaleString('fr-FR')} pts · combo ×${t.maxCombo}${t.accuracy!=null?' · précision '+t.accuracy+' %':''}`;
   const seen=new Set();$('sheet').innerHTML='<div class="r"><b>Structure</b><span>'+structureOf(t.bars).map(x=>x.type+(x.level?' '+(x.level+1):'')+' '+x.len).join(' · ')+'</span></div>'+
     structureOf(t.bars).filter(x=>!seen.has(x.type)&&seen.add(x.type)).map(x=>`<div class="r"><span>${x.type}</span><span>${romanOf(d,x.type)}</span></div>`).join('')+
@@ -325,9 +325,10 @@ async function exportTrack(kind){const t=current;if(!t)return;const info=$('expo
 async function shareTrack(){const t=current;const id=t.remoteId??(typeof t.id==='number'?t.id:null);if(id==null)return;const url=new URL(location.href);url.search='?t='+id;
   const data={title:'MODUL — '+t.name,text:`${t.name} · ${fmt(t.seconds)} · ${t.keyName} · ${t.bpm} BPM`,url:url.toString()};
   try{if(navigator.share){await navigator.share(data)}else{await navigator.clipboard.writeText(url.toString());$('exportInfo').textContent='Lien copié'}}catch(e){}}
+$('btnStudio').onclick=()=>{const t=current;if(!t)return;const id=typeof t.id==='string'?t.id:(t.remoteId??t.id);location.href='studio.html?t='+encodeURIComponent(id)};
 $('btnMidi').onclick=()=>exportTrack('midi');$('btnWav').onclick=()=>exportTrack('wav');$('btnShare').onclick=shareTrack;
 async function replay(t){if(replaying){engineStop();onEngineEnd();return}const st=STYLES[t.style]?t.style:'pop';buildAudio();if(ctx.state==='suspended')await ctx.resume();if(!loaded.has(st)){$('btnReplay').textContent='Chargement…';await loadStyle(st)}
-  replaying=true;$('btnReplay').textContent='Stop';$('cover').classList.add('playing');engine.onBar=null;engine.onEnd=onEngineEnd;engineStart(describe(t.seed,st),{events:t.events||[],bars:t.bars})}
+  replaying=true;$('btnReplay').textContent='Stop';$('cover').classList.add('playing');engine.onBar=null;engine.onEnd=onEngineEnd;engineStart(describe(t.seed,st,t.over||{}),{events:t.events||[],bars:t.bars,arr:t.arr||null})}
 let tab='mine';const esc=x=>String(x).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
 async function showList(){show('list');const el=$('items');el.innerHTML='<div class="empty">…</div>';let items=[];
   if(tab==='mine')items=load('modul-tracks',[]);else{try{items=(await api(tab==='daily'?'/api/tracks?daily='+todayKey():'/api/tracks?limit=50')).tracks}catch(e){el.innerHTML='<div class="empty">Classement indisponible hors ligne.</div>';return}}
