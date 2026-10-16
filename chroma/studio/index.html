@@ -28,7 +28,7 @@
 <header><div class="wrap nav">
 <a class="brand" href="../"><span class="brand-mark"><i></i><i></i><i></i><i></i></span>CHROMA<small>STUDIO</small></a>
 <nav class="nav-links"><a href="../#principe">Le principe</a><a href="../cote/">La Cote</a><a class="active" href="./">Studio</a><a href="../#economie">Transparence</a></nav>
-<a class="btn primary small" href="../play/">Jouer CHROMA</a>
+<a class="btn primary small" href="../scene/">Jouer CHROMA</a>
 </div></header>
 
 <main class="wrap">
@@ -84,7 +84,7 @@
 </div>
 </main>
 
-<footer class="wrap"><span>MUSICBOX · STUDIO · PILOTE 2026</span><span><a href="../play/">Jouer</a> · <a href="../cote/">La Cote</a> · <a href="../#economie">Transparence</a></span></footer>
+<footer class="wrap"><span>MUSICBOX · STUDIO · PILOTE 2026</span><span><a href="../scene/">Jouer</a> · <a href="../cote/">La Cote</a> · <a href="../#economie">Transparence</a></span></footer>
 
 <script src="../assets/demo-data.js"></script>
 <script>
@@ -109,7 +109,7 @@ $('estimate').innerHTML='<div class="row2"><div><b>'+fmt(plays)+'</b><span>piste
 fetch('/api/cote').then(r=>r.ok?r.json():null).then(r=>{if(r&&r.real){REAL=r;estimate();const b=document.querySelector('.demo-banner');b.innerHTML='<b style="color:var(--accent)">INVENTAIRE RÉEL</b><span>Le serveur MUSICBOX mesure '+fmt(r.totals.plays7)+' pistes jouées sur 7 jours. Les estimations utilisent cet inventaire réel ; le tableau de bord de campagne reste une projection tant que l’attribution des conversions n’est pas branchée.</span>';b.style.borderColor='#1f5a3f';b.style.background='#0e1a13';b.style.color='#bfe8d0'}}).catch(()=>{});
 function load(){try{return JSON.parse(localStorage.getItem('musicbox-campaigns')||'[]')}catch(e){return []}}
 function saveAll(c){try{localStorage.setItem('musicbox-campaigns',JSON.stringify(c))}catch(e){}}
-function trackLink(c){const u=new URL('../play/',location.href);u.searchParams.set('track',c.audio);u.searchParams.set('artist',c.artist);u.searchParams.set('title',c.title);if(valid(c.link))u.searchParams.set('link',c.link);u.searchParams.set('partner','1');return u.toString()}
+function trackLink(c){const u=new URL('../scene/',location.href);u.searchParams.set('track',c.audio);u.searchParams.set('artist',c.artist);u.searchParams.set('title',c.title);if(valid(c.link))u.searchParams.set('link',c.link);u.searchParams.set('partner','1');return u.toString()}
 function renderCampaigns(){
 const list=load();
 $('campaigns').innerHTML=list.length?list.map((c,i)=>'<div class="camp"><div><b>'+c.title+' <span class="tag sponsor">PARTENAIRE</span></b><small>'+c.artist+' · '+c.type+' · '+c.regions.join(', ')+' · '+c.budget+' € / '+c.days+' j</small><small style="display:block;margin-top:4px;word-break:break-all"><a href="'+c.url+'" target="_blank" rel="noopener">'+c.url+'</a></small></div><div style="text-align:right"><div class="status'+(i===list.length-1?' live':'')+'">'+(i===list.length-1?'PRÊTE · LIEN ACTIF':'ENREGISTRÉE')+'</div><button class="btn ghost small" type="button" data-copy="'+i+'" style="margin-top:8px">Copier le lien</button></div></div>').join(''):'<div class="empty" style="margin-top:12px">Aucune campagne pour l’instant. Créez-en une : le lien de piste fonctionne immédiatement dans CHROMA.</div>';

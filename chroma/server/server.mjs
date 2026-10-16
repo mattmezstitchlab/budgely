@@ -4,6 +4,7 @@
        POST /api/plays     une piste jouée (envoyée par le jeu à la fin d'un niveau)
        POST /api/events    partage / clic sur le lien artiste
        GET  /api/cote      agrégats 30 jours : classement, inventaire par région, totaux
+       GET/POST /api/tracks  morceaux composés dans le jeu (classement « playlist », rejouables)
        GET  /api/health
    Données : SQLite (node:sqlite) dans chroma/server/data/musicbox.db
    Lancement : node chroma/server/server.mjs   (PORT=8090 par défaut, HOST=0.0.0.0)
@@ -31,7 +32,15 @@ CREATE TABLE IF NOT EXISTS events(
   title TEXT, artist TEXT, track_url TEXT, region TEXT
 );
 CREATE INDEX IF NOT EXISTS events_ts ON events(ts);
+CREATE TABLE IF NOT EXISTS tracks(
+  id INTEGER PRIMARY KEY, ts INTEGER NOT NULL, player TEXT NOT NULL, name TEXT NOT NULL,
+  seed INTEGER NOT NULL, bpm INTEGER, key_name TEXT, bars INTEGER, seconds REAL, score INTEGER, sections INTEGER, max_combo INTEGER, events TEXT
+);
+CREATE INDEX IF NOT EXISTS tracks_bars ON tracks(bars);
 `);
+const insTrack=db.prepare(`INSERT INTO tracks(ts,player,name,seed,bpm,key_name,bars,seconds,score,sections,max_combo,events) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`);
+const selTop=db.prepare(`SELECT id,ts,player,name,seed,bpm,key_name keyName,bars,seconds,score,sections,max_combo maxCombo FROM tracks WHERE ts>=? ORDER BY bars DESC, score DESC LIMIT ?`);
+const selTrack=db.prepare(`SELECT id,ts,player,name,seed,bpm,key_name keyName,bars,seconds,score,sections,max_combo maxCombo,events FROM tracks WHERE id=?`);
 const insPlay=db.prepare(`INSERT INTO plays(ts,player,title,artist,track_url,partner,real,win,collected,goal,on_beat,taps,minutes,region,daily) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
 const insEvent=db.prepare(`INSERT INTO events(ts,player,type,title,artist,track_url,region) VALUES(?,?,?,?,?,?,?)`);
 const selPlays=db.prepare(`SELECT * FROM plays WHERE ts>=? ORDER BY ts`);
@@ -76,7 +85,7 @@ return {generatedAt:new Date(now).toISOString(),days:30,real:list.length>0,track
 
 const MIME={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml','.mp3':'audio/mpeg','.wav':'audio/wav','.ico':'image/x-icon','.txt':'text/plain; charset=utf-8','.md':'text/plain; charset=utf-8'};
 function send(res,code,body,type='application/json'){res.writeHead(code,{'Content-Type':type,'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'Content-Type','Access-Control-Allow-Methods':'GET,POST,OPTIONS','Cache-Control':'no-store'});res.end(typeof body==='string'?body:JSON.stringify(body))}
-function readJson(req){return new Promise((resolve,reject)=>{let s='';req.on('data',c=>{s+=c;if(s.length>20000){reject(new Error('too large'));req.destroy()}});req.on('end',()=>{try{resolve(s?JSON.parse(s):{})}catch(e){reject(e)}});req.on('error',reject)})}
+function readJson(req){return new Promise((resolve,reject)=>{let s='';req.on('data',c=>{s+=c;if(s.length>120000){reject(new Error('too large'));req.destroy()}});req.on('end',()=>{try{resolve(s?JSON.parse(s):{})}catch(e){reject(e)}});req.on('error',reject)})}
 
 const server=http.createServer(async(req,res)=>{
 try{
@@ -98,6 +107,19 @@ if(p==='/api/events'&&req.method==='POST'){
   if(!['share','click','conversion'].includes(type))return send(res,400,{error:'type invalide'});
   insEvent.run(Date.now(),str(b.player,40)||'anon',type,str(b.title,120)||null,str(b.artist,80)||null,str(b.trackUrl,500)||null,str(b.region,60)||null);
   return send(res,201,{ok:true});
+}
+if(p==='/api/tracks'&&req.method==='GET'){
+  const id=url.searchParams.get('id');
+  if(id){const t=selTrack.get(int(id,0,1e12));if(!t)return send(res,404,{error:'inconnu'});t.events=JSON.parse(t.events||'[]');return send(res,200,t)}
+  return send(res,200,{days:30,tracks:selTop.all(Date.now()-30*DAY,int(url.searchParams.get('limit')||50,1,100))});
+}
+if(p==='/api/tracks'&&req.method==='POST'){
+  if(!allow(ip))return send(res,429,{error:'trop de requêtes'});
+  const b=await readJson(req);const name=str(b.name,60),events=Array.isArray(b.events)?b.events.slice(0,4000):[];
+  const bars=int(b.bars,1,100000);if(!name||!bars)return send(res,400,{error:'name et bars requis'});
+  const ev=events.filter(e=>Array.isArray(e)&&e.length===4).map(e=>[num(e[0],0,1e6),int(e[1],0,5),int(e[2],2,99),e[3]?1:0]);
+  const r=insTrack.run(Date.now(),str(b.player,40)||'anon',name,int(b.seed,0,2**31),int(b.bpm,60,200),str(b.keyName,20)||null,bars,num(b.seconds,0,36000),int(b.score,0,1e9),int(b.sections,0,9999),int(b.maxCombo,0,999),JSON.stringify(ev));
+  return send(res,201,{ok:true,id:Number(r.lastInsertRowid)});
 }
 if(p.startsWith('/api/'))return send(res,404,{error:'inconnu'});
 /* statique */
