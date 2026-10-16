@@ -38,9 +38,10 @@ CREATE TABLE IF NOT EXISTS tracks(
 );
 CREATE INDEX IF NOT EXISTS tracks_bars ON tracks(bars);
 `);
-const insTrack=db.prepare(`INSERT INTO tracks(ts,player,name,seed,bpm,key_name,bars,seconds,score,sections,max_combo,events) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`);
-const selTop=db.prepare(`SELECT id,ts,player,name,seed,bpm,key_name keyName,bars,seconds,score,sections,max_combo maxCombo FROM tracks WHERE ts>=? ORDER BY bars DESC, score DESC LIMIT ?`);
-const selTrack=db.prepare(`SELECT id,ts,player,name,seed,bpm,key_name keyName,bars,seconds,score,sections,max_combo maxCombo,events FROM tracks WHERE id=?`);
+try{db.exec('ALTER TABLE tracks ADD COLUMN style TEXT')}catch(e){}
+const insTrack=db.prepare(`INSERT INTO tracks(ts,player,name,seed,bpm,key_name,bars,seconds,score,sections,max_combo,events,style) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)`);
+const selTop=db.prepare(`SELECT id,ts,player,name,seed,bpm,key_name keyName,bars,seconds,score,sections,max_combo maxCombo,style FROM tracks WHERE ts>=? ORDER BY bars DESC, score DESC LIMIT ?`);
+const selTrack=db.prepare(`SELECT id,ts,player,name,seed,bpm,key_name keyName,bars,seconds,score,sections,max_combo maxCombo,style,events FROM tracks WHERE id=?`);
 const insPlay=db.prepare(`INSERT INTO plays(ts,player,title,artist,track_url,partner,real,win,collected,goal,on_beat,taps,minutes,region,daily) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
 const insEvent=db.prepare(`INSERT INTO events(ts,player,type,title,artist,track_url,region) VALUES(?,?,?,?,?,?,?)`);
 const selPlays=db.prepare(`SELECT * FROM plays WHERE ts>=? ORDER BY ts`);
@@ -83,7 +84,7 @@ const list=[...tracks.values()].map(t=>{
 return {generatedAt:new Date(now).toISOString(),days:30,real:list.length>0,tracks:list,inventory,totals:{...totals,minutes7:Math.round(totals.minutes7),onBeat:totals.taps?totals.onBeatTaps/totals.taps:0},rawPlays30:plays.length};
 }
 
-const MIME={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml','.mp3':'audio/mpeg','.wav':'audio/wav','.ico':'image/x-icon','.txt':'text/plain; charset=utf-8','.md':'text/plain; charset=utf-8'};
+const MIME={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml','.mp3':'audio/mpeg','.wav':'audio/wav','.flac':'audio/flac','.ogg':'audio/ogg','.ico':'image/x-icon','.txt':'text/plain; charset=utf-8','.md':'text/plain; charset=utf-8'};
 function send(res,code,body,type='application/json'){res.writeHead(code,{'Content-Type':type,'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'Content-Type','Access-Control-Allow-Methods':'GET,POST,OPTIONS','Cache-Control':'no-store'});res.end(typeof body==='string'?body:JSON.stringify(body))}
 function readJson(req){return new Promise((resolve,reject)=>{let s='';req.on('data',c=>{s+=c;if(s.length>120000){reject(new Error('too large'));req.destroy()}});req.on('end',()=>{try{resolve(s?JSON.parse(s):{})}catch(e){reject(e)}});req.on('error',reject)})}
 
@@ -118,7 +119,7 @@ if(p==='/api/tracks'&&req.method==='POST'){
   const b=await readJson(req);const name=str(b.name,60),events=Array.isArray(b.events)?b.events.slice(0,4000):[];
   const bars=int(b.bars,1,100000);if(!name||!bars)return send(res,400,{error:'name et bars requis'});
   const ev=events.filter(e=>Array.isArray(e)&&e.length===4).map(e=>[num(e[0],0,1e6),int(e[1],0,5),int(e[2],2,99),e[3]?1:0]);
-  const r=insTrack.run(Date.now(),str(b.player,40)||'anon',name,int(b.seed,0,2**31),int(b.bpm,60,200),str(b.keyName,20)||null,bars,num(b.seconds,0,36000),int(b.score,0,1e9),int(b.sections,0,9999),int(b.maxCombo,0,999),JSON.stringify(ev));
+  const r=insTrack.run(Date.now(),str(b.player,40)||'anon',name,int(b.seed,0,2**31),int(b.bpm,60,200),str(b.keyName,20)||null,bars,num(b.seconds,0,36000),int(b.score,0,1e9),int(b.sections,0,9999),int(b.maxCombo,0,999),JSON.stringify(ev),str(b.style,20)||null);
   return send(res,201,{ok:true,id:Number(r.lastInsertRowid)});
 }
 if(p.startsWith('/api/'))return send(res,404,{error:'inconnu'});
@@ -127,7 +128,7 @@ let file=path.normalize(path.join(ROOT,decodeURIComponent(p)));
 if(!file.startsWith(ROOT)||file.startsWith(path.join(ROOT,'server')))return send(res,403,'Interdit','text/plain');
 if(fs.existsSync(file)&&fs.statSync(file).isDirectory())file=path.join(file,'index.html');
 if(!fs.existsSync(file))return send(res,404,'Introuvable','text/plain');
-res.writeHead(200,{'Content-Type':MIME[path.extname(file)]||'application/octet-stream'});
+res.writeHead(200,{'Content-Type':MIME[path.extname(file)]||'application/octet-stream','Cache-Control':/\/samples\//.test(file)?'public, max-age=31536000, immutable':'no-cache'});
 fs.createReadStream(file).pipe(res);
 }catch(e){send(res,500,{error:'erreur serveur'})}
 });

@@ -5,7 +5,8 @@ Plateforme de l'écoute prouvée. Un fichier HTML par page, zéro dépendance, u
 ```
 chroma/
 ├── index.html          MUSICBOX — landing (principe, mécanique, plateforme, artistes, économie, FAQ)
-├── play/               CHROMA — le jeu principal : un plateau, un tempo, compose le morceau le plus long (son synthétisé, playlist rejouable)
+├── play/               CHROMA — le jeu principal : un plateau, un tempo, compose le morceau le plus long
+│   └── samples/        vrais sons (CC0 : 808, kits Sonic Pi, percussions ; CC BY 3.0 : piano, basse, guitare, xylophone) — voir LICENSES.md
 ├── scene/              version « scène » : jouer sur un vrai titre d'artiste (+ chroma-analysis.js : tempo, premier temps, tonalité)
 ├── cote/               La Cote — classement par écoute prouvée (démo → réel dès qu'il y a des données)
 ├── studio/             Le Studio — régie partenaires (coût par piste jouée, inventaire réel si disponible)
