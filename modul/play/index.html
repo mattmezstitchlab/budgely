@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#000">
 <title>MODUL — le studio est un cube</title>
 <style>
-:root{--c0:#ff4f5e;--c1:#a78bfa;--c2:#4cc9f0;--c3:#00ed8b;--c4:#ffd166;--c5:#ff5fa2;--fg:#f5f5f7;--mute:rgba(245,245,247,.55);--line:rgba(255,255,255,.1);
-  --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Helvetica Neue",Arial,sans-serif;--dock:214px;--head:112px}
+:root{--dock0:96px;--c0:#ff4f5e;--c1:#a78bfa;--c2:#4cc9f0;--c3:#00ed8b;--c4:#ffd166;--c5:#ff5fa2;--fg:#f5f5f7;--mute:rgba(245,245,247,.55);--line:rgba(255,255,255,.1);
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Helvetica Neue",Arial,sans-serif;--dock:96px;--head:128px}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:#000;color:var(--fg);font-family:var(--font);-webkit-font-smoothing:antialiased;overscroll-behavior:none;overflow:hidden}
 body{user-select:none;-webkit-user-select:none;background:radial-gradient(120% 80% at 50% 38%,#17171c 0%,#0a0a0c 55%,#000 100%)}
@@ -17,12 +17,28 @@ button{cursor:pointer}a{color:inherit;text-decoration:none}
 /* en-tête */
 .head{position:fixed;left:0;right:0;top:0;height:var(--head);padding:max(10px,env(safe-area-inset-top)) 16px 0;display:flex;flex-direction:column;align-items:center;z-index:5;pointer-events:none}
 .head>*{pointer-events:auto}
-.top{width:100%;max-width:720px;display:flex;align-items:center;justify-content:space-between;height:40px}
+.top{width:100%;max-width:980px;display:flex;align-items:center;justify-content:space-between;height:40px;gap:10px}
+.acts{display:flex;align-items:center;gap:6px}
+.pill{height:36px;padding:0 14px;border-radius:980px;background:rgba(255,255,255,.1);font-size:13px;font-weight:600;backdrop-filter:blur(12px);white-space:nowrap}
+.pill:hover{background:rgba(255,255,255,.16)}
+.menuwrap{position:relative}
+.menu{position:absolute;right:0;top:calc(100% + 8px);min-width:200px;background:#1c1c20;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:6px;box-shadow:0 20px 50px rgba(0,0,0,.5);z-index:40;display:flex;flex-direction:column}
+.mi{text-align:left;padding:10px 12px;border-radius:10px;font-size:14px;white-space:nowrap}.mi:hover{background:rgba(255,255,255,.08)}
+.only-s{display:none}
+@media (max-width:600px){#save,#share{display:none}.only-s{display:block}}
+.mpill{display:inline-flex;align-items:center;gap:4px;height:30px;padding:0 10px;border-radius:980px;background:rgba(255,255,255,.07);font-size:13px;font-weight:600;color:var(--fg);font-variant-numeric:tabular-nums;white-space:nowrap}
+button.mpill:hover,.selwrap:hover{background:rgba(255,255,255,.13)}
+.stepper{padding:0 4px}.stepper button{width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.08);font-size:14px}.stepper b{font-weight:600;margin-left:4px}.stepper i{font-style:normal;color:var(--mute);font-weight:500;margin-right:4px;font-size:11px}
+.selwrap{padding:0}.selwrap select{height:30px;padding:0 24px 0 10px;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23aaa' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 9px center;appearance:none;-webkit-appearance:none;font-weight:600;font-size:13px;color:var(--fg);outline:0}
+.menu.keys{left:50%;right:auto;transform:translateX(-50%);min-width:240px;padding:10px}
+.kgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:8px}.kgrid button{height:34px;border-radius:9px;font-size:13px;font-weight:600;background:rgba(255,255,255,.06)}.kgrid button.on{background:var(--fg);color:#000}
+.seg{display:flex;background:rgba(255,255,255,.06);border-radius:980px;padding:3px}.seg button{flex:1;height:30px;border-radius:980px;font-size:13px;font-weight:600;color:var(--mute)}.seg button.on{background:var(--fg);color:#000}
+.dur{font-size:12.5px;color:var(--mute);margin-left:4px}
 .brand{font-weight:700;letter-spacing:-.03em;font-size:17px}.brand small{font-weight:600;color:var(--mute);margin-left:6px;font-size:12px;letter-spacing:.14em}
-.icon{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.08);display:inline-flex;align-items:center;justify-content:center;font-size:15px;backdrop-filter:blur(12px)}
+.icon{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);display:inline-flex;align-items:center;justify-content:center;font-size:16px;backdrop-filter:blur(12px)}.icon:hover{background:rgba(255,255,255,.16)}
 input.name{font-size:21px;font-weight:700;letter-spacing:-.03em;text-align:center;width:min(90vw,520px);margin-top:4px;outline:0;border-bottom:1px solid transparent}
 input.name:focus{border-color:var(--line)}
-.meta{font-size:13px;color:var(--mute);margin-top:2px;text-align:center;white-space:nowrap}.meta b{color:var(--fg);font-weight:600}
+.meta{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;flex-wrap:wrap}
 /* scène 3D : tout l'espace entre l'en-tête et le dock */
 #stage{position:fixed;left:0;right:0;top:var(--head);bottom:var(--dock);z-index:1}
 #nogl{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:var(--mute);padding:24px;font-size:14px}
@@ -42,27 +58,21 @@ input.name:focus{border-color:var(--line)}
 .bars{display:flex;gap:3px;height:3px}.bars i{width:10px;border-radius:2px;background:rgba(255,255,255,.15)}.bars i.on{background:var(--fg)}
 .hint{font-size:12px;color:var(--mute);text-align:center;padding:0 16px}
 /* dock : chef d'orchestre + transport */
-.dock{position:fixed;left:0;right:0;bottom:0;min-height:var(--dock);padding:8px 12px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.9) 30%);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;z-index:6}
-.dockin{width:100%;max-width:720px;display:flex;flex-direction:column;gap:8px}
-.reply{font-size:13.5px;color:#d2d2d7;line-height:1.35;background:rgba(255,255,255,.06);border-radius:16px;padding:9px 14px;max-height:56px;overflow:hidden}
-.reply:empty{display:none}
-.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.dock{position:fixed;left:0;right:0;bottom:0;min-height:var(--dock);padding:8px 12px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.92) 35%);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;z-index:6}
+.dockin{width:100%;max-width:760px;display:flex;flex-direction:column;gap:8px}
+.reply{font-size:13.5px;color:#d2d2d7;line-height:1.35;text-align:center;padding:0 12px;opacity:0;transition:opacity .4s;max-height:40px;overflow:hidden}
+.reply.show{opacity:1}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:0 2px}
 .chips::-webkit-scrollbar{display:none}
 .chips button{flex:none;padding:7px 12px;border-radius:980px;background:rgba(255,255,255,.08);font-size:12.5px;font-weight:600;color:#d2d2d7;white-space:nowrap}
-.prompt{display:flex;align-items:center;gap:8px;background:#151517;border:1px solid rgba(255,255,255,.14);border-radius:980px;padding:5px 5px 5px 16px}
+.bar{display:flex;align-items:center;gap:8px}
+.bar .play{width:48px;height:48px;font-size:18px;background:var(--fg);color:#000;flex:none}
+.prompt{flex:1;display:flex;align-items:center;gap:6px;background:#151517;border:1px solid rgba(255,255,255,.14);border-radius:980px;padding:5px 5px 5px 6px;min-width:0}
 .prompt input{flex:1;outline:0;font-size:15px;min-width:0}
 .prompt input::placeholder{color:rgba(245,245,247,.4)}
-.prompt .go{width:36px;height:36px;border-radius:50%;background:var(--fg);color:#000;font-weight:700;display:grid;place-items:center}
-.transport{display:flex;align-items:center;gap:6px;overflow-x:auto;scrollbar-width:none}
-.transport::-webkit-scrollbar{display:none}
-.transport .icon{width:42px;height:42px;font-size:17px;flex:none}
-.transport .play{background:var(--fg);color:#000}
-.transport .group{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.07);border-radius:980px;padding:4px 6px;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;flex:none}
-.transport .group button{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.08)}
-.transport select{background:rgba(255,255,255,.07);border-radius:980px;padding:0 12px;height:38px;font-size:13px;font-weight:600;color:var(--fg);appearance:none;-webkit-appearance:none;flex:none}
-.transport .small{height:38px;padding:0 13px;border-radius:980px;background:rgba(255,255,255,.1);font-size:13px;font-weight:600;flex:none;white-space:nowrap}
-.transport .sp{flex:1}
-.info{font-size:12px;color:var(--mute);white-space:nowrap}
+.prompt .go{width:36px;height:36px;border-radius:50%;background:var(--fg);color:#000;font-weight:700;display:grid;place-items:center;flex:none}
+.prompt .ideas{width:36px;height:36px;border-radius:50%;color:var(--mute);font-size:15px;flex:none}.prompt .ideas:hover,.prompt .ideas.on{background:rgba(255,255,255,.1);color:var(--fg)}
+.info{font-size:12px;color:var(--mute);white-space:nowrap}.info:empty{display:none}
 .lib{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center}
 .libin{width:100%;max-width:560px;max-height:80svh;background:#141417;border-radius:22px 22px 0 0;padding:14px 16px calc(16px + env(safe-area-inset-bottom));display:flex;flex-direction:column}
 .libhead{display:flex;align-items:center;gap:10px;font-size:17px;margin-bottom:8px}.libhead .small{flex:1;font-size:13px;color:var(--mute)}
@@ -73,15 +83,37 @@ input.name:focus{border-color:var(--line)}
 .empty{padding:28px 8px;text-align:center;color:var(--mute);font-size:14px}
 .toast{position:fixed;left:50%;top:calc(var(--head) + 8px);transform:translateX(-50%);padding:10px 16px;border-radius:980px;background:rgba(255,255,255,.14);backdrop-filter:blur(20px);font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:20}
 .toast.show{opacity:1}
-@media (max-height:640px){:root{--head:96px}.hint{display:none}}
+@media (max-height:640px){:root{--head:118px}.hint{display:none}}
+.hint.off{opacity:0;transition:opacity .6s}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <header class="head">
-  <div class="top"><a class="brand" href="../">MODUL <small>STUDIO</small></a><button class="icon" id="libBtn" title="Bibliothèque" aria-label="Bibliothèque">≡</button></div>
-  <input class="name" id="name" value="Nouveau module" maxlength="40" aria-label="Nom du morceau">
-  <div class="meta" id="meta"></div>
+  <div class="top">
+    <a class="brand" href="../">MODUL <small>STUDIO</small></a>
+    <div class="acts">
+      <button class="pill" id="save">Enregistrer</button>
+      <button class="pill" id="share">Partager</button>
+      <div class="menuwrap"><button class="icon" id="moreBtn" aria-label="Plus d’actions" aria-haspopup="menu">⋯</button>
+        <div class="menu hidden" id="menu" role="menu">
+          <button class="mi only-s" id="saveM">Enregistrer</button>
+          <button class="mi only-s" id="shareM">Partager</button>
+          <button class="mi" id="midi">Exporter en MIDI</button>
+          <button class="mi" id="wav">Exporter en WAV</button>
+          <button class="mi" id="shuffle">Nouveau projet</button>
+        </div></div>
+      <button class="icon" id="libBtn" title="Bibliothèque" aria-label="Bibliothèque">≡</button>
+    </div>
+  </div>
+  <input class="name" id="name" value="Nouveau module" maxlength="40" aria-label="Nom du morceau"><span id="mode" hidden></span>
+  <div class="meta" id="meta">
+    <div class="menuwrap"><button class="mpill" id="keyBtn" aria-haspopup="dialog">Do majeur</button>
+      <div class="menu keys hidden" id="keyMenu"><div class="kgrid" id="kgrid"></div><div class="seg" id="modeSeg"><button data-m="major">majeur</button><button data-m="minor">mineur</button></div></div></div>
+    <span class="mpill stepper"><button id="bpmDown" aria-label="Moins vite">−</button><b id="bpm">120</b><i>BPM</i><button id="bpmUp" aria-label="Plus vite">+</button></span>
+    <span class="mpill selwrap"><select id="style" aria-label="Style"></select></span>
+    <span class="dur" id="dur"></span>
+  </div>
 </header>
 <div id="stage"></div>
 <div class="rows" id="rows"><span style="--c:var(--c0)"><i></i><b>BATTERIE</b></span><span style="--c:var(--c1)"><i></i><b>BASSE</b></span><span style="--c:var(--c2)"><i></i><b>ACCORDS</b></span><span style="--c:var(--c3)"><i></i><b>MÉLODIE</b></span></div>
@@ -91,20 +123,11 @@ input.name:focus{border-color:var(--line)}
   <div class="hint" id="hint">Fais tourner le cube. Une face = une section. Tape un pad : éteint → présent → fort.</div>
 </div>
 <div class="dock"><div class="dockin">
-  <div class="reply" id="reply"></div>
-  <div class="chips" id="chips"></div>
-  <form class="prompt" id="form"><input id="q" placeholder="Demande au chef d’orchestre : « ajoute une mélodie au refrain »" autocomplete="off"><button class="go" type="submit" aria-label="Envoyer">↑</button></form>
-  <div class="transport">
+  <div class="reply" id="reply" aria-live="polite"></div>
+  <div class="chips hidden" id="chips"></div>
+  <div class="bar">
     <button class="icon play" id="play" aria-label="Lecture">▶</button>
-    <div class="group"><button id="bpmDown" aria-label="Moins vite">−</button><span id="bpm">120</span><button id="bpmUp" aria-label="Plus vite">+</button></div>
-    <select id="style" aria-label="Style"></select>
-    <button class="small" id="mode">mineur</button>
-    <span class="sp"></span>
-    <button class="small" id="shuffle">Graine</button>
-    <button class="small" id="midi">MIDI</button>
-    <button class="small" id="wav">WAV</button>
-    <button class="small" id="save">Enregistrer</button>
-    <button class="small" id="share">Partager</button>
+    <form class="prompt" id="form"><button class="ideas" type="button" id="ideasBtn" aria-label="Suggestions" title="Suggestions">✦</button><input id="q" placeholder="Demande au chef d’orchestre…" autocomplete="off"><button class="go" type="submit" aria-label="Envoyer">↑</button></form>
     <span class="info" id="info"></span>
   </div>
 </div></div>
@@ -142,11 +165,12 @@ let view=null,playedBeat=-1;
 window.STUDIO={proj,PADS,TYPES,INST,
   toggle(f,i){const t=TYPES[f];proj.pads[t][i]=(proj.pads[t][i]+1)%3;if(view)view.refresh();if(playing)engine.arr=arrOf();setFace(f,false);preview(i,proj.pads[t][i])},
   onFacing(f){setFace(f,false)},
-  onGrab(){$('rows').classList.add('off');clearTimeout(window.STUDIO._g);window.STUDIO._g=setTimeout(()=>$('rows').classList.remove('off'),900)},
+  onGrab(){$('hint').classList.add('off');$('rows').classList.add('off');clearTimeout(window.STUDIO._g);window.STUDIO._g=setTimeout(()=>$('rows').classList.remove('off'),900)},
   attachView(v){view=v;v.refresh();v.goFace(face)},
   noWebGL(){const d=document.createElement('div');d.id='nogl';d.textContent='La 3D n’est pas disponible sur ce navigateur. Le chef d’orchestre et la lecture fonctionnent quand même.';$('stage').appendChild(d)}};
 function buildUI(){const sec=$('sections');sec.innerHTML='';TYPES.forEach((t,f)=>{const b=document.createElement('button');b.textContent=t;b.onclick=()=>goFace(f);sec.appendChild(b)})}
-function renderAll(){if(view)view.refresh();const d=desc();$('meta').innerHTML=`<b>${d.keyName}</b> · ${d.bpm} BPM · ${d.S.n} · ${TOTAL_BARS} mesures · ${fmt(TOTAL_BARS*4*60/d.bpm)}`;$('bpm').textContent=d.bpm;$('mode').textContent=d.mode==='minor'?'mineur':'majeur';$('style').value=proj.style}
+function renderAll(){if(view)view.refresh();const d=desc();$('keyBtn').textContent=d.keyName;$('dur').textContent=`${TOTAL_BARS} mesures · ${fmt(TOTAL_BARS*4*60/d.bpm)}`;$('bpm').textContent=d.bpm;$('style').value=proj.style;
+  [...$('kgrid').children].forEach((b,i)=>b.classList.toggle('on',i===d.root));[...$('modeSeg').children].forEach(b=>b.classList.toggle('on',b.dataset.m===d.mode))}
 function setFace(f,turn=true){face=f;[...$('sections').children].forEach((b,k)=>b.classList.toggle('on',k===f));if(turn&&view)view.goFace(f)}
 function goFace(f){setFace(f,true)}
 async function preview(i,level){ /* écoute immédiate du pad touché */
@@ -172,15 +196,23 @@ document.addEventListener('keydown',e=>{if(e.key===' '&&!/INPUT|SELECT|TEXTAREA/
 /* ---------- transport ---------- */
 function setBpm(v){proj.over.bpm=Math.max(60,Math.min(200,v));renderAll();if(playing){stop();togglePlay()}}
 $('bpmDown').onclick=()=>setBpm(desc().bpm-2);$('bpmUp').onclick=()=>setBpm(desc().bpm+2);
-$('mode').onclick=()=>{proj.over.mode=desc().mode==='minor'?'major':'minor';renderAll();if(playing){stop();togglePlay()}};
+KEYS.forEach((k,i)=>{const b=document.createElement('button');b.textContent=k;b.onclick=()=>{proj.over.root=i;renderAll();if(playing){stop();togglePlay()}};$('kgrid').appendChild(b)});
+[...$('modeSeg').children].forEach(b=>b.onclick=()=>{proj.over.mode=b.dataset.m;renderAll();if(playing){stop();togglePlay()}});
+/* menus */
+function toggleMenu(id,on){const m=$(id);m.classList.toggle('hidden',on===undefined?undefined:!on)}
+$('keyBtn').onclick=e=>{e.stopPropagation();toggleMenu('menu',false);toggleMenu('keyMenu')};$('moreBtn').onclick=e=>{e.stopPropagation();toggleMenu('keyMenu',false);toggleMenu('menu')};
+document.addEventListener('click',e=>{if(!e.target.closest('.menuwrap')){toggleMenu('menu',false);toggleMenu('keyMenu',false)}});
+$('menu').addEventListener('click',()=>toggleMenu('menu',false));
+$('ideasBtn').onclick=()=>{$('chips').classList.toggle('hidden');$('ideasBtn').classList.toggle('on',!$('chips').classList.contains('hidden'))};
+function say(t,ms=7000){const r=$('reply');r.textContent=t;r.classList.add('show');clearTimeout(say.t);if(ms)say.t=setTimeout(()=>r.classList.remove('show'),ms)}
 Object.entries(STYLES).forEach(([id,S])=>{const o=document.createElement('option');o.value=id;o.textContent=S.n;$('style').appendChild(o)});
 $('style').onchange=()=>{proj.style=$('style').value;renderAll();if(playing){stop();togglePlay()}};
-$('shuffle').onclick=()=>{proj.id=null;proj.remoteId=null;proj.seed=(Date.now()^Math.floor(Math.random()*1e9))>>>0;proj.over={};$('name').value=desc().name;renderAll();toast('Nouvelle tonalité et nouveau tempo');if(playing){stop();togglePlay()}};
+$('shuffle').onclick=()=>{proj.id=null;proj.remoteId=null;proj.seed=(Date.now()^Math.floor(Math.random()*1e9))>>>0;proj.over={};$('name').value=desc().name;renderAll();toast('Nouveau projet : nouvelle tonalité, nouveau tempo');if(playing){stop();togglePlay()}};
 function trackObj(){const d=desc();return {id:proj.id||(proj.id='s'+Date.now().toString(36)),remoteId:proj.remoteId,ts:Date.now(),app:'studio',name:$('name').value.trim()||d.name,style:proj.style,seed:proj.seed,over:{...proj.over},arr:arrOf(),pads:proj.pads,bpm:d.bpm,keyName:d.keyName,bars:TOTAL_BARS,seconds:Math.round(TOTAL_BARS*4*60/d.bpm),score:0,sections:FORM.length,maxCombo:0,events:[]}}
 function saveLocal(t){const mine=load('modul-tracks',[]).filter(x=>x.id!==t.id);mine.unshift(t);save('modul-tracks',mine.slice(0,100));return t}
 async function publish(t){const r=await api('/api/tracks',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...t,player:playerId(),name:'MODUL · '+t.name,events:[]})});proj.remoteId=r.id;t.remoteId=r.id;saveLocal(t);return r.id}
-$('save').onclick=()=>{saveLocal(trackObj());toast('Enregistré dans la bibliothèque')};
-$('share').onclick=async()=>{const t=saveLocal(trackObj());try{const id=await publish(t);const url=new URL(location.href);url.search='?t='+id;const data={title:'MODUL — '+t.name,text:`${t.name} · ${t.keyName} · ${t.bpm} BPM`,url:url.toString()};
+$('save').onclick=$('saveM').onclick=()=>{saveLocal(trackObj());toast('Enregistré dans la bibliothèque')};
+$('share').onclick=$('shareM').onclick=async()=>{const t=saveLocal(trackObj());try{const id=await publish(t);const url=new URL(location.href);url.search='?t='+id;const data={title:'MODUL — '+t.name,text:`${t.name} · ${t.keyName} · ${t.bpm} BPM`,url:url.toString()};
   if(navigator.share){await navigator.share(data)}else{await navigator.clipboard.writeText(url.toString());toast('Lien copié')}}catch(e){if(e&&e.name!=='AbortError')toast('Partage impossible pour l’instant')}};
 /* bibliothèque */
 function renderLib(){const mine=load('modul-tracks',[]);$('libCount').textContent=mine.length?`${mine.length} projet${mine.length>1?'s':''}`:'';const el=$('libList');el.innerHTML='';
@@ -216,7 +248,7 @@ function conductor(q){const raw=q.trim();if(!raw)return;const s=norm(raw);const 
     out.push(`${remove?'retiré':more?'renforcé':less?'adouci':'ajouté'} : ${insts.map(i=>INST[i].n.toLowerCase()).join(', ')} — ${T.join(', ')}`)}
   else if(insts.length===0&&targets&&!out.length){goFace(TYPES.indexOf(targets[0]));out.push('je montre '+targets[0])}
   renderAll();if(playing)engine.arr=arrOf();
-  $('reply').textContent=out.length?'Fait : '+out.join(' · ')+'.':'Je comprends les instruments (batterie, basse, accords, mélodie, percussions, voix), les sections, « plus fort / moins fort / retire », un tempo en BPM, mineur / majeur, les styles, « surprends-moi » et « vide ».';
+  say(out.length?'Fait : '+out.join(' · ')+'.':'Je comprends les instruments (batterie, basse, accords, mélodie, percussions, voix), les sections, « plus fort / moins fort / retire », un tempo en BPM, mineur / majeur, les styles, « surprends-moi » et « vide ».',12000);
   if(targets&&targets.length===1&&insts.length)goFace(TYPES.indexOf(targets[0]))}
 if(window.ResizeObserver)new ResizeObserver(()=>document.documentElement.style.setProperty('--dock',document.querySelector('.dock').offsetHeight+'px')).observe(document.querySelector('.dock'));
 $('form').onsubmit=e=>{e.preventDefault();conductor($('q').value);$('q').value=''};
@@ -230,7 +262,7 @@ function openTrack(t){proj.id=typeof t.id==='string'?t.id:null;proj.remoteId=t.r
   const mine=load('modul-tracks',[]);let t=id?mine.find(x=>String(x.id)===id||String(x.remoteId)===id):null;
   if(!t&&id&&/^\d+$/.test(id)){try{t=await api('/api/tracks?id='+id)}catch(e){}}
   if(t)openTrack(t);else{proj.seed=(Date.now()^Math.floor(Math.random()*1e9))>>>0;defaultArrangement();$('name').value=desc().name}
-  renderAll();goFace(0);$('reply').textContent='Je suis le chef d’orchestre. Dis-moi quoi changer, ou touche les pads : chaque face est une section, chaque rangée un instrument.'})();
+  renderAll();goFace(0);say('Je suis le chef d’orchestre. Dis-moi quoi changer, ou touche les pads.',9000)})();
 </script>
 <script type="module" src="studio3d.js"></script>
 </body>
