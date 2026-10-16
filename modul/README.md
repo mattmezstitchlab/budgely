@@ -34,6 +34,7 @@ Sans serveur, les pages statiques fonctionnent aussi (La Cote et le Studio reste
 | `POST /api/tracks` | un projet du studio partagé : nom, graine, BPM, tonalité, mesures, arrangement (`arr`), réglages (`over`), pads — permet la réécoute exacte par lien |
 | `POST /api/conductor` | `{text,state}` → `{llm,actions,reply}` ; `{llm:false}` si aucun modèle n'est configuré |
 | `GET /api/brief?url=` | titre, description, site, langue d'une page (brief depuis une URL) |
+| `play/?use=<usage>&mood=<ambiance>[&sec=N][&embed=1]` | ouvre le studio directement sur un usage (`wedding`, `kids`, `yoga`, `jingle`…). `embed=1` = mode intégré au site : pas d'actions de fichier, un bouton « Écouter » |
 | `GET /api/tracks?id=` | détail d'un projet partagé (ouvert par `play/?t=<id>`) ; `?limit=` liste les anciens morceaux de jeu s'il en reste |
 | `POST /api/plays` | une piste jouée, envoyée par le jeu à la fin d'un niveau (titre, artiste, réussite, récolte, taps dans le tempo, minutes, région déclarée) |
 | `POST /api/events` | `share` / `click` / `conversion` sur un titre |
