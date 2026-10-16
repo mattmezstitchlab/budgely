@@ -131,6 +131,24 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:30px;letter-spacing:-1px;fon
 .paused-banner h2{font:500 28px 'Space Grotesk',sans-serif}
 .paused-banner button{width:180px}
 .hidden{display:none!important}
+.scene-row{display:flex;gap:8px;margin-top:10px}
+.scene-row .secondary{margin-top:0}
+.field{display:flex;flex-direction:column;gap:5px;text-align:left;margin-top:10px}
+.field label{font-size:9px;letter-spacing:1.5px;color:var(--muted);font-weight:700}
+.field input{background:#0b0f0c;border:1px solid #2a332b;color:var(--text);border-radius:8px;padding:10px 12px;font:inherit;font-size:13px}
+.field input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.analysis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0 6px}
+.analysis div{border:1px solid #2a332b;border-radius:10px;padding:10px 8px}
+.analysis b{display:block;font:500 20px 'Space Grotesk',sans-serif;margin-top:4px}
+.analysis span{font-size:8px;letter-spacing:1.3px;color:var(--muted);font-weight:700}
+.scene-status{font-size:11px;color:#a1af99;margin:10px 0 0;min-height:16px}
+.artist-card{border:1px solid #2a332b;border-radius:12px;padding:14px;margin-top:16px;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.artist-card b{display:block;font:500 15px 'Space Grotesk',sans-serif}
+.artist-card small{color:var(--muted);font-size:10px}
+.artist-card .primary{width:auto;padding:10px 14px;font-size:11px}
+.equalizer.live i{animation:none!important;transform-origin:bottom;transition:transform .08s}
+.track-cta{margin-top:14px;display:flex;gap:8px}
+.track-cta .secondary{margin-top:0;padding:9px;font-size:11px}
 .share-preview{font-family:ui-monospace,monospace;font-size:12px;line-height:1.8;background:#0b0f0c;border:1px solid #2a332b;border-radius:10px;padding:12px;margin-bottom:16px;white-space:pre-wrap;text-align:left;color:#d6ded2}
 @keyframes eq{to{transform:scaleY(1)}}
 @keyframes pop{50%{transform:scale(1.12);filter:brightness(1.5)}100%{transform:scale(0);opacity:0}}
@@ -153,7 +171,7 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:30px;letter-spacing:-1px;fon
 <div><div class="eyebrow" id="modeEyebrow">LA SESSION</div><div class="level-heading"><h1 id="levelTitle">Piste 001</h1><span class="level-pill" id="difficulty">PREMIERS ACCORDS</span></div></div>
 <div class="topline-actions">
 <button class="text-button daily" id="dailyBtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Couleur du jour</button>
-<button class="text-button" id="levelsBtn">Les 520 pistes <svg viewBox="0 0 24 24"><rect x="4" y="4" width="5" height="5" rx="1"/><rect x="15" y="4" width="5" height="5" rx="1"/><rect x="4" y="15" width="5" height="5" rx="1"/><rect x="15" y="15" width="5" height="5" rx="1"/></svg></button>
+<button class="text-button" id="sceneBtn"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Scène</button><button class="text-button" id="levelsBtn">Les 520 pistes <svg viewBox="0 0 24 24"><rect x="4" y="4" width="5" height="5" rx="1"/><rect x="15" y="4" width="5" height="5" rx="1"/><rect x="4" y="15" width="5" height="5" rx="1"/><rect x="15" y="15" width="5" height="5" rx="1"/></svg></button>
 </div>
 </div>
 <div class="game-layout">
@@ -177,7 +195,7 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:30px;letter-spacing:-1px;fon
 </div>
 </section>
 <aside class="side right">
-<div class="card music-card"><div class="music-title"><span class="eyebrow">LE MORCEAU</span><span class="on-air" id="onAir">EN ATTENTE</span></div><div class="track-name" id="trackName">Electric Bloom</div><div class="track-sub" id="trackSub">CHROMA ORIGINALS · 112 BPM</div><div class="equalizer" id="equalizer"></div><div class="arrangement" id="arrangement"><i></i><i></i><i></i><i></i></div><div class="track-times"><span id="songSection">INTRO</span><span id="barCount">mesure 1</span></div><span class="section-tag" id="stageHint">L'ARRANGEMENT SUIT VOTRE RÉCOLTE</span><div class="volume"><svg viewBox="0 0 24 24"><path d="m11 5-5 4H3v6h3l5 4Z"/></svg><input id="volume" aria-label="Volume" type="range" min="0" max="100" value="65"></div></div>
+<div class="card music-card"><div class="music-title"><span class="eyebrow">LE MORCEAU</span><span class="on-air" id="onAir">EN ATTENTE</span></div><div class="track-name" id="trackName">Electric Bloom</div><div class="track-sub" id="trackSub">CHROMA ORIGINALS · 112 BPM</div><div class="equalizer" id="equalizer"></div><div class="arrangement" id="arrangement"><i></i><i></i><i></i><i></i></div><div class="track-times"><span id="songSection">INTRO</span><span id="barCount">mesure 1</span></div><span class="section-tag" id="stageHint">L'ARRANGEMENT SUIT VOTRE RÉCOLTE</span><div class="track-cta"><button class="secondary" id="openSceneBtn">Changer de titre</button><button class="secondary hidden" id="artistLinkBtn">Découvrir l’artiste →</button></div><div class="volume"><svg viewBox="0 0 24 24"><path d="m11 5-5 4H3v6h3l5 4Z"/></svg><input id="volume" aria-label="Volume" type="range" min="0" max="100" value="65"></div></div>
 <div class="hint"><svg viewBox="0 0 24 24"><path d="m12 3 2.6 6.4L21 12l-6.4 2.6L12 21l-2.6-6.4L3 12l6.4-2.6Z"/></svg><div class="eyebrow">CHAQUE GESTE EST UNE NOTE</div><p>Tapotez un groupe : <b>son instrument joue</b>.<br>Tapez <b>sur le temps</b> : points ×2.<br>Trois fois d'affilée : <b>+1 coup</b>.</p><p>5 cases ou plus ? Une pulsation <b>+</b> qui efface toute une ligne.</p>
 <div class="instruments" id="instrumentList"></div></div>
 </aside>
@@ -193,8 +211,21 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:30px;letter-spacing:-1px;fon
 
 <div class="overlay hidden" id="levelOverlay"><div class="modal"><div class="eyebrow">VOTRE SESSION</div><h2 style="font-size:30px">520 pistes à jouer.</h2><p style="margin-bottom:10px">Chaque piste enregistre un instrument. Le point = déjà jouée.</p><div class="level-grid" id="levelGrid"></div><div class="pages"><button id="prevPage" aria-label="Page précédente">←</button><span id="pageLabel"></span><button id="nextPage" aria-label="Page suivante">→</button></div><button class="secondary" id="closeLevels">Retour au jeu</button></div></div>
 
+<div class="overlay hidden" id="sceneOverlay"><div class="modal"><div class="eyebrow">LA SCÈNE · UN VRAI TITRE DANS LE JEU</div><h2 style="font-size:30px">Le morceau,<br>c’est le niveau.</h2><p style="margin-bottom:6px">Chargez un titre : CHROMA détecte le tempo, le premier temps et la tonalité. Le groove, les notes de vos taps et l’arrangement se calent dessus.</p>
+<div class="analysis"><div><span>TEMPO</span><b id="anBpm">112</b></div><div><span>TONALITÉ</span><b id="anKey">La min.</b></div><div><span>1ER TEMPS</span><b id="anPhase">0,00 s</b></div></div>
+<p class="scene-status" id="sceneStatus">Titre actuel : Electric Bloom (synthétisé par le jeu).</p>
+<div class="scene-row"><button class="secondary" id="fileBtn">Charger un MP3 / WAV</button><button class="secondary" id="demoBtn">Démo : titre réel 124 BPM</button></div>
+<input type="file" id="fileInput" accept="audio/*" class="hidden">
+<div class="field"><label for="artistName">ARTISTE</label><input id="artistName" placeholder="Nom de l’artiste" maxlength="60"></div>
+<div class="field"><label for="trackTitle">TITRE</label><input id="trackTitle" placeholder="Titre du morceau" maxlength="80"></div>
+<div class="field"><label for="artistLink">LIEN À FAIRE DÉCOUVRIR (pré-save, billetterie, boutique…)</label><input id="artistLink" placeholder="https://…" inputmode="url"></div>
+<div class="field"><label for="trackUrl">URL DU FICHIER AUDIO (optionnel, pour un lien de piste partageable)</label><input id="trackUrl" placeholder="https://…/titre.mp3" inputmode="url"></div>
+<div class="artist-card hidden" id="artistCard"><div><b id="artistCardName"></b><small id="artistCardSub"></small></div><button class="primary" id="artistCardBtn">Découvrir →</button></div>
+<div class="scene-row"><button class="secondary" id="copyTrackLink">Copier le lien de la piste</button><button class="secondary" id="resetTrackBtn">Revenir à Electric Bloom</button></div>
+<button class="secondary" id="closeScene" style="margin-top:16px">Retour au jeu</button></div></div>
 <div class="toast" id="toast" role="status"></div>
 
+<script src="chroma-analysis.js"></script>
 <script>
 (()=>{
 'use strict';
@@ -258,7 +289,10 @@ $('stageNote').textContent=['Récoltez cette couleur : l’instrument entre dans
 for(let k=0;k<3;k++)$('g'+k).classList.toggle('on',k<streak);
 [...$('arrangement').children].forEach((el,k)=>{el.classList.toggle('on',k<currentStage);el.classList.toggle('now',k===currentStage)});
 $('songSection').textContent=stageNames[currentStage]+' · '+['la première couleur','les couleurs s’éveillent','electric bloom','tout s’illumine'][currentStage].toUpperCase();
-$('trackName').textContent='Electric Bloom';$('trackSub').textContent='FEAT. '+instruments[target].toUpperCase()+' · 112 BPM';
+$('trackName').textContent=trackMode&&trackInfo.title?trackInfo.title:'Electric Bloom';
+$('trackSub').textContent=(trackMode?(trackInfo.artist||'ARTISTE').toUpperCase():'CHROMA ORIGINALS · FEAT. '+instruments[target].toUpperCase())+' · '+Math.round(bpm)+' BPM'+(analysisResult?' · '+analysisResult.key.name.toUpperCase():'');
+$('artistLinkBtn').classList.toggle('hidden',!(trackMode&&validLink(trackInfo.link)));
+if(trackMode&&trackFilter)applyStageToTrack();
 }
 function render(drop=false){
 const frag=document.createDocumentFragment();
@@ -335,7 +369,7 @@ return {key,lvl,label};
 }
 function shareText(r){
 const inst=instruments[r.target],em=emojis[r.target];
-return 'CHROMA · Couleur du jour · '+r.label+'\n'+em+' '+names[r.target]+' · '+inst+'\n'+(r.win?'✅':'❌')+' '+Math.min(r.goal,r.collected)+'/'+r.goal+' · '+r.score.toLocaleString('fr')+' pts · '+r.movesLeft+' coup'+(r.movesLeft>1?'s':'')+' restant'+(r.movesLeft>1?'s':'')+'\n♪ '+r.onBeatTaps+' taps dans le tempo · groove ×'+r.grooves;
+return 'CHROMA · Couleur du jour · '+r.label+'\n'+em+' '+names[r.target]+' · '+inst+'\n'+(r.win?'✅':'❌')+' '+Math.min(r.goal,r.collected)+'/'+r.goal+' · '+r.score.toLocaleString('fr')+' pts · '+r.movesLeft+' coup'+(r.movesLeft>1?'s':'')+' restant'+(r.movesLeft>1?'s':'')+'\n♪ '+r.onBeatTaps+' taps dans le tempo · groove ×'+r.grooves+(r.track&&r.track.title?'\n🎧 '+r.track.title+(r.track.artist?' — '+r.track.artist:'')+(validLink(r.track.link)?'\n'+withRef(r.track.link):''):'');
 }
 function showDailyResult(r){
 state='result';lastWin=r.win;update();
@@ -353,7 +387,7 @@ if(r.fresh&&r.win)playVictory();
 function finish(win){
 state='result';lastWin=win;update();
 if(daily){
-const r={key:dailyKey,label:dailyLabel,target,win,collected,goal,score,movesLeft:moves,movesTotal:params(level).moves,onBeatTaps,grooves,fresh:true};
+const r={key:dailyKey,label:dailyLabel,target,win,collected,goal,score,movesLeft:moves,movesTotal:params(level).moves,onBeatTaps,grooves,fresh:true,track:trackMode?{artist:trackInfo.artist,title:trackInfo.title,link:trackInfo.link}:null};
 save('chroma-daily-'+dailyKey,r);showDailyResult(r);return;
 }
 $('result').classList.remove('hidden');
@@ -379,7 +413,7 @@ notify('Même grille pour le monde entier aujourd’hui. Une seule tentative : '
 }
 function notify(text){$('toast').textContent=text;$('toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('show'),2800)}
 $('replayBtn').onclick=()=>{init(level);state='play'};
-$('startBtn').onclick=()=>{$('intro').classList.add('hidden');state='play';audioStart();notify('Vous enregistrez : '+instruments[target]+' ('+names[target].toLowerCase()+'). Tapez sur le temps pour le ×2.')};
+$('startBtn').onclick=()=>{$('intro').classList.add('hidden');state='play';audioStart();if(pendingTrack){loadTrackFromUrl(pendingTrack);pendingTrack=null;return}notify('Vous enregistrez : '+instruments[target]+' ('+names[target].toLowerCase()+'). Tapez sur le temps pour le ×2.')};
 $('dailyBtn').onclick=startDaily;
 function pauseToggle(){if(state!=='play')return;paused=!paused;$('pausedBanner').classList.toggle('hidden',!paused);if(ctx){if(paused)ctx.suspend();else ctx.resume()}document.body.classList.toggle('playing',!paused&&!muted)}
 $('pauseBtn').onclick=pauseToggle;$('resumeBtn').onclick=pauseToggle;
@@ -397,13 +431,16 @@ $('instrumentList').replaceChildren(...instruments.map((n,k)=>{const d=document.
 
 /* ---------- Audio: a progress-driven arrangement. The level's colour is the featured instrument. ---------- */
 let ctx,master,musicBus,leadBus,delay,feedback,compressor,noiseBuffer,muted=false,started=false,nextStep=0,step=0,startTime=0,timer;
-const bpm=112,beat=60/bpm,sixteenth=beat/4;
-const chords=[[57,60,64,67],[53,57,60,64],[60,64,67,71],[55,59,62,65]];
+let bpm=112,beat=60/bpm,sixteenth=beat/4;
+const defaultChords=[[57,60,64,67],[53,57,60,64],[60,64,67,71],[55,59,62,65]];let chords=defaultChords;
+let analyser,trackMode=false,trackBuffer=null,trackSource=null,trackFilter=null,trackGain=null,analysisResult=null,pendingTrack=null;
+let trackInfo={artist:'',title:'',link:'',url:''};
 const melody=[0,2,3,2,1,2,4,3,2,1,0,2,3,4,2,1];
 function buildAudio(){
 ctx=new (window.AudioContext||window.webkitAudioContext)();
 compressor=ctx.createDynamicsCompressor();compressor.threshold.value=-16;compressor.ratio.value=4;
 master=ctx.createGain();master.gain.value=Number($('volume').value)/100;master.connect(compressor);compressor.connect(ctx.destination);
+analyser=ctx.createAnalyser();analyser.fftSize=128;analyser.smoothingTimeConstant=.72;compressor.connect(analyser);
 musicBus=ctx.createGain();musicBus.gain.value=.68;musicBus.connect(master);
 leadBus=ctx.createGain();leadBus.gain.value=.7;leadBus.connect(master);
 delay=ctx.createDelay();delay.delayTime.value=beat*.75;feedback=ctx.createGain();feedback.gain.value=.24;delay.connect(feedback);feedback.connect(delay);const wet=ctx.createGain();wet.gain.value=.16;delay.connect(wet);wet.connect(master);
@@ -423,7 +460,7 @@ osc.connect(f);f.connect(g);g.connect(bus);if(bus===leadBus)g.connect(delay);osc
 function kick(t,amp=.3){const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(42,t+.15);g.gain.setValueAtTime(amp,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.connect(g);g.connect(musicBus);o.start(t);o.stop(t+.26)}
 function hat(t,amp=.04,snare=false,bus=musicBus){const s=ctx.createBufferSource(),f=ctx.createBiquadFilter(),g=ctx.createGain();s.buffer=noiseBuffer;f.type='highpass';f.frequency.value=snare?1400:7500;g.gain.setValueAtTime(amp,t);g.gain.exponentialRampToValueAtTime(.001,t+(snare?.14:.045));s.connect(f);f.connect(g);g.connect(bus);s.start(t);s.stop(t+.2)}
 function schedule(){
-if(!ctx||ctx.state!=='running')return;
+if(!ctx||ctx.state!=='running'||trackMode)return;
 while(nextStep<ctx.currentTime+.14){compose(step,nextStep);nextStep+=sixteenth;step++}
 }
 function compose(s,t){
@@ -479,8 +516,100 @@ requestAnimationFrame(pulse);
 if(!ctx||!started||paused||ctx.state!=='running'){document.documentElement.style.setProperty('--pulse','0');return}
 const ph=((ctx.currentTime-startTime)/beat)%1;
 document.documentElement.style.setProperty('--pulse',Math.pow(1-ph,2.2).toFixed(3));
+if(analyser&&!muted){const data=new Uint8Array(analyser.frequencyBinCount);analyser.getByteFrequencyData(data);const eq=$('equalizer');eq.classList.add('live');const bars=eq.children;for(let i=0;i<bars.length;i++){const v=data[1+Math.floor(i*(data.length-3)/bars.length)]/255;bars[i].style.transform='scaleY('+(0.12+v*0.88).toFixed(2)+')'}}
 })();
 setInterval(()=>{if(!ctx||!started)return;const bar=Math.floor(Math.max(0,ctx.currentTime-startTime)/(beat*4));$('barCount').textContent='mesure '+(bar+1)},250);
+/* ---------- La Scène : un vrai titre devient le niveau ---------- */
+const validLink=u=>/^https?:\/\/[^\s]+$/i.test(u||'');
+function refCode(){let c='';try{c=localStorage.getItem('chroma-ref')||''}catch(e){}if(!c){c=Math.random().toString(36).slice(2,8);save('chroma-ref',c)}return c}
+function withRef(link){if(!validLink(link))return link;try{const u=new URL(link);u.searchParams.set('ref','chroma-'+refCode());return u.toString()}catch(e){return link}}
+function sceneStatus(t){$('sceneStatus').textContent=t}
+function applyStageToTrack(immediate){
+if(!trackFilter)return;const st=currentStage,now=ctx.currentTime,tc=immediate?.01:.35;
+trackFilter.frequency.setTargetAtTime([650,1900,20000,20000][st],now,tc);
+trackGain.gain.setTargetAtTime([.55,.75,.95,1][st],now,tc);
+}
+function stopTrackSource(){if(trackSource){try{trackSource.stop()}catch(e){}trackSource.disconnect();trackSource=null}}
+function startTrackPlayback(){
+trackMode=true;audioStart();if(!ctx)return;
+stopTrackSource();
+if(!trackFilter){trackFilter=ctx.createBiquadFilter();trackFilter.type='lowpass';trackFilter.Q.value=.7;trackGain=ctx.createGain();trackFilter.connect(trackGain);trackGain.connect(musicBus)}
+const first=analysisResult.firstBeat,nb=Math.max(4,Math.floor((trackBuffer.duration-first-.02)/beat));
+trackSource=ctx.createBufferSource();trackSource.buffer=trackBuffer;trackSource.loop=true;trackSource.loopStart=first;trackSource.loopEnd=first+nb*beat;
+trackSource.connect(trackFilter);
+const t0=ctx.currentTime+.15;trackSource.start(t0,first);startTime=t0;
+applyStageToTrack(true);
+}
+async function loadTrackBuffer(buffer,info){
+sceneStatus('Analyse du titre : tempo, premier temps, tonalité…');
+await new Promise(r=>setTimeout(r,40));
+const ch=buffer.numberOfChannels,len=buffer.length,mono=new Float32Array(len);
+for(let c=0;c<ch;c++){const d=buffer.getChannelData(c);for(let i=0;i<len;i++)mono[i]+=d[i]/ch}
+let res;try{res=ChromaAnalysis.analyze(mono,buffer.sampleRate)}catch(e){sceneStatus('Analyse impossible sur ce fichier.');return}
+if(!(res.bpm>40&&res.bpm<220)){sceneStatus('Tempo introuvable : ce titre est trop libre pour le groove.');return}
+trackBuffer=buffer;analysisResult=res;Object.assign(trackInfo,info);
+bpm=res.bpm;beat=res.beat;sixteenth=beat/4;chords=res.chords;if(delay)delay.delayTime.setTargetAtTime(beat*.75,ctx.currentTime,.05);
+startTrackPlayback();
+$('anBpm').textContent=bpm.toFixed(1);$('anKey').textContent=res.key.name.replace('majeur','maj.').replace('mineur','min.');$('anPhase').textContent=res.firstBeat.toFixed(2).replace('.',',')+' s';
+sceneStatus('En écoute : '+(trackInfo.title||'titre sans nom')+(trackInfo.artist?' — '+trackInfo.artist:'')+'. Le groove est calé sur '+Math.round(bpm)+' BPM.');
+save('chroma-track-info',trackInfo);refreshArtistCard();update();
+notify('Le niveau joue maintenant sur ce titre · '+Math.round(bpm)+' BPM · '+res.key.name);
+}
+function resetTrack(){
+stopTrackSource();trackMode=false;analysisResult=null;trackBuffer=null;
+bpm=112;beat=60/bpm;sixteenth=beat/4;chords=defaultChords;
+if(ctx){if(delay)delay.delayTime.setTargetAtTime(beat*.75,ctx.currentTime,.05);if(started){startTime=ctx.currentTime+.09;nextStep=startTime;step=0}}
+$('anBpm').textContent='112';$('anKey').textContent='La min.';$('anPhase').textContent='0,00 s';
+sceneStatus('Titre actuel : Electric Bloom (synthétisé par le jeu).');refreshArtistCard();update();
+}
+function infoFromInputs(){return {artist:$('artistName').value.trim(),title:$('trackTitle').value.trim(),link:$('artistLink').value.trim(),url:$('trackUrl').value.trim()}}
+function refreshArtistCard(){
+const show=trackMode&&(trackInfo.artist||trackInfo.title);
+$('artistCard').classList.toggle('hidden',!show);
+$('artistCardName').textContent=trackInfo.title||'Titre';$('artistCardSub').textContent=(trackInfo.artist||'Artiste')+(analysisResult?' · '+Math.round(bpm)+' BPM · '+analysisResult.key.name:'');
+$('artistCardBtn').classList.toggle('hidden',!validLink(trackInfo.link));
+}
+function openArtist(){if(validLink(trackInfo.link))window.open(withRef(trackInfo.link),'_blank','noopener')}
+$('artistCardBtn').onclick=openArtist;$('artistLinkBtn').onclick=openArtist;
+async function decodeArrayBuffer(ab){if(!ctx)buildAudio();return await new Promise((res,rej)=>{const p=ctx.decodeAudioData(ab,res,rej);if(p&&p.then)p.then(res,rej)})}
+$('fileBtn').onclick=()=>$('fileInput').click();
+$('fileInput').onchange=async e=>{
+const f=e.target.files[0];if(!f)return;
+try{sceneStatus('Lecture de '+f.name+'…');const ab=await f.arrayBuffer();const buf=await decodeArrayBuffer(ab);const info=infoFromInputs();if(!info.title){info.title=f.name.replace(/\.[^.]+$/,'');$('trackTitle').value=info.title}info.url='';await loadTrackBuffer(buf,info)}
+catch(err){sceneStatus('Impossible de décoder ce fichier audio.')}
+e.target.value='';
+};
+async function loadTrackFromUrl(t){
+['artistName','trackTitle','artistLink','trackUrl'].forEach((id,k)=>{$(id).value=[t.artist,t.title,t.link,t.url][k]||''});Object.assign(trackInfo,infoFromInputs());
+try{sceneStatus('Téléchargement du titre…');const r=await fetch(t.url);if(!r.ok)throw new Error(r.status);const buf=await decodeArrayBuffer(await r.arrayBuffer());
+await loadTrackBuffer(buf,{artist:t.artist||'',title:t.title||'',link:t.link||'',url:t.url});}
+catch(err){sceneStatus('Téléchargement impossible (le serveur du fichier doit autoriser le CORS).');notify('Titre inaccessible : '+(t.url||''))}
+}
+$('demoBtn').onclick=async()=>{
+if(!ctx)buildAudio();
+sceneStatus('Génération du titre de démonstration…');await new Promise(r=>setTimeout(r,30));
+const sr=ctx.sampleRate,data=ChromaAnalysis.renderDemoTrack(sr,{bpm:124,tonic:5,mode:'major',seconds:32,offset:.3});
+const buf=ctx.createBuffer(1,data.length,sr);buf.copyToChannel(data,0);
+$('artistName').value='CHROMA Test Lab';$('trackTitle').value='Démo 124 BPM';
+await loadTrackBuffer(buf,{artist:'CHROMA Test Lab',title:'Démo 124 BPM',link:$('artistLink').value.trim(),url:''});
+};
+$('resetTrackBtn').onclick=resetTrack;
+['artistName','trackTitle','artistLink','trackUrl'].forEach(id=>$(id).addEventListener('input',()=>{Object.assign(trackInfo,infoFromInputs());save('chroma-track-info',trackInfo);refreshArtistCard();update()}));
+$('copyTrackLink').onclick=async()=>{
+const info=infoFromInputs();
+if(!validLink(info.url)){notify('Indiquez l’URL publique du fichier audio pour créer un lien de piste.');return}
+const u=new URL(location.href);u.search='';['track','artist','title','link'].forEach((k,i)=>{const v=[info.url,info.artist,info.title,info.link][i];if(v)u.searchParams.set(k,v)});
+try{await navigator.clipboard.writeText(u.toString());notify('Lien de la piste copié : envoyez-le, le titre se charge tout seul.')}catch(e){notify(u.toString())}
+};
+function openScene(){if(state==='intro')return;if(state==='play'&&!paused)pauseToggle();$('sceneOverlay').classList.remove('hidden')}
+$('sceneBtn').onclick=openScene;$('openSceneBtn').onclick=openScene;
+$('closeScene').onclick=()=>{$('sceneOverlay').classList.add('hidden');if(paused)pauseToggle()};
+(function bootScene(){
+try{const saved=JSON.parse(localStorage.getItem('chroma-track-info')||'null');if(saved){['artistName','trackTitle','artistLink','trackUrl'].forEach((id,k)=>{$(id).value=[saved.artist,saved.title,saved.link,saved.url][k]||''})}}catch(e){}
+const q=new URLSearchParams(location.search);
+if(validLink(q.get('track')||'')){pendingTrack={url:q.get('track'),artist:q.get('artist')||'',title:q.get('title')||'',link:q.get('link')||''};
+const m=document.querySelector('#intro .micro');m.textContent='Piste partagée : '+(pendingTrack.title||'titre')+(pendingTrack.artist?' — '+pendingTrack.artist:'')+'. Le titre se chargera au démarrage.'}
+})();
 init(level);
 })();
 </script>
