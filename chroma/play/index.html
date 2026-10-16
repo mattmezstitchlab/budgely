@@ -200,7 +200,7 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:30px;letter-spacing:-1px;fon
 <div class="instruments" id="instrumentList"></div></div>
 </aside>
 </div>
-<footer class="footer"><span><a href="../" style="color:inherit;text-decoration:none">← CHROMA · LA PLATEFORME</a> · 6 INSTRUMENTS · 520 PISTES</span><span>CASQUE CONSEILLÉ · PLAISIR SANS CHRONO</span></footer>
+<footer class="footer"><span><a href="../" style="color:inherit;text-decoration:none">← MUSICBOX</a> · <a href="../cote/" style="color:inherit;text-decoration:none">LA COTE</a> · 6 INSTRUMENTS · 520 PISTES</span><span>CASQUE CONSEILLÉ · PLAISIR SANS CHRONO</span></footer>
 </main>
 
 <div class="overlay" id="intro"><div class="modal"><div class="eyebrow">UN JEU À VOIR. ET À ENTENDRE.</div><h2>Chaque couleur<br>est un instrument.</h2><div class="hero-tiles"><i style="--c:#ffe500">♪</i><i style="--c:#00ed8b">●</i><i style="--c:#a04be0">~</i><i style="--c:#00c9d7">∴</i><i style="--c:#ff286e">△</i></div>
@@ -256,7 +256,7 @@ return {pal,goal,moves,obs,bias};
 /* ---------- State ---------- */
 let level=0,unlocked=0,score=0,moves=16,collected=0,goal=24,target=0,pal=4,bias=.25,board=[],busy=false,state='intro',paused=false,page=0,toastTimer;
 let daily=false,dailyKey=0,dailyLabel='',campaignLevel=0,streak=0,grooves=0,onBeatTaps=0,lastWin=false,currentStage=0;
-let best={};
+let best={},levelStart=Date.now();
 try{
 unlocked=Math.min(LEVELS-1,Math.max(0,Number(localStorage.getItem('chroma-unlocked'))||0));level=unlocked;campaignLevel=level;
 best=JSON.parse(localStorage.getItem('chroma-best')||'{}')||{};
@@ -268,7 +268,7 @@ function init(l,opts={}){
 level=l;daily=!!opts.daily;
 const p=params(l);pal=p.pal;target=l%pal;goal=p.goal;moves=p.moves;bias=p.bias;
 rng=opts.seed!=null?mulberry32(opts.seed):Math.random;
-score=0;collected=0;busy=false;streak=0;grooves=0;onBeatTaps=0;lastWin=false;
+score=0;collected=0;busy=false;streak=0;grooves=0;onBeatTaps=0;lastWin=false;levelStart=Date.now();
 board=Array.from({length:N},randomTile);
 if(p.obs){const idx=shuffle([...Array(N).keys()]);for(let j=0;j<p.obs;j++)board[idx[j]]={c:-1,s:false}}
 ensureMoves(false);render();update();
@@ -290,7 +290,7 @@ for(let k=0;k<3;k++)$('g'+k).classList.toggle('on',k<streak);
 [...$('arrangement').children].forEach((el,k)=>{el.classList.toggle('on',k<currentStage);el.classList.toggle('now',k===currentStage)});
 $('songSection').textContent=stageNames[currentStage]+' · '+['la première couleur','les couleurs s’éveillent','electric bloom','tout s’illumine'][currentStage].toUpperCase();
 $('trackName').textContent=trackMode&&trackInfo.title?trackInfo.title:'Electric Bloom';
-$('trackSub').textContent=(trackMode?(trackInfo.artist||'ARTISTE').toUpperCase():'CHROMA ORIGINALS · FEAT. '+instruments[target].toUpperCase())+' · '+Math.round(bpm)+' BPM'+(analysisResult?' · '+analysisResult.key.name.toUpperCase():'');
+$('trackSub').textContent=(trackMode?(trackInfo.artist||'ARTISTE').toUpperCase()+(trackInfo.partner?' · PARTENAIRE':''):'CHROMA ORIGINALS · FEAT. '+instruments[target].toUpperCase())+' · '+Math.round(bpm)+' BPM'+(analysisResult?' · '+analysisResult.key.name.toUpperCase():'');
 $('artistLinkBtn').classList.toggle('hidden',!(trackMode&&validLink(trackInfo.link)));
 if(trackMode&&trackFilter)applyStageToTrack();
 }
@@ -384,8 +384,13 @@ $('nextBtn').onclick=()=>{$('shareBtn').classList.add('hidden');$('sharePreview'
 $('replayBtn').classList.add('hidden');
 if(r.fresh&&r.win)playVictory();
 }
+function logPlay(win){
+try{const list=JSON.parse(localStorage.getItem('chroma-plays')||'[]');
+list.push({t:Date.now(),title:trackMode?(trackInfo.title||'Titre sans nom'):'Electric Bloom',artist:trackMode?(trackInfo.artist||'Artiste'):'CHROMA Originals',real:trackMode,win,collected,goal,onBeatTaps,grooves,minutes:Math.round((Date.now()-levelStart)/600)/100,bpm:Math.round(bpm),daily,level:level+1});
+while(list.length>300)list.shift();localStorage.setItem('chroma-plays',JSON.stringify(list))}catch(e){}
+}
 function finish(win){
-state='result';lastWin=win;update();
+state='result';lastWin=win;update();logPlay(win);
 if(daily){
 const r={key:dailyKey,label:dailyLabel,target,win,collected,goal,score,movesLeft:moves,movesTotal:params(level).moves,onBeatTaps,grooves,fresh:true,track:trackMode?{artist:trackInfo.artist,title:trackInfo.title,link:trackInfo.link}:null};
 save('chroma-daily-'+dailyKey,r);showDailyResult(r);return;
@@ -434,7 +439,7 @@ let ctx,master,musicBus,leadBus,delay,feedback,compressor,noiseBuffer,muted=fals
 let bpm=112,beat=60/bpm,sixteenth=beat/4;
 const defaultChords=[[57,60,64,67],[53,57,60,64],[60,64,67,71],[55,59,62,65]];let chords=defaultChords;
 let analyser,trackMode=false,trackBuffer=null,trackSource=null,trackFilter=null,trackGain=null,analysisResult=null,pendingTrack=null;
-let trackInfo={artist:'',title:'',link:'',url:''};
+let trackInfo={artist:'',title:'',link:'',url:'',partner:false};
 const melody=[0,2,3,2,1,2,4,3,2,1,0,2,3,4,2,1];
 function buildAudio(){
 ctx=new (window.AudioContext||window.webkitAudioContext)();
@@ -566,7 +571,7 @@ function infoFromInputs(){return {artist:$('artistName').value.trim(),title:$('t
 function refreshArtistCard(){
 const show=trackMode&&(trackInfo.artist||trackInfo.title);
 $('artistCard').classList.toggle('hidden',!show);
-$('artistCardName').textContent=trackInfo.title||'Titre';$('artistCardSub').textContent=(trackInfo.artist||'Artiste')+(analysisResult?' · '+Math.round(bpm)+' BPM · '+analysisResult.key.name:'');
+$('artistCardName').textContent=trackInfo.title||'Titre';$('artistCardSub').textContent=(trackInfo.artist||'Artiste')+(trackInfo.partner?' · Partenaire':'')+(analysisResult?' · '+Math.round(bpm)+' BPM · '+analysisResult.key.name:'');
 $('artistCardBtn').classList.toggle('hidden',!validLink(trackInfo.link));
 }
 function openArtist(){if(validLink(trackInfo.link))window.open(withRef(trackInfo.link),'_blank','noopener')}
@@ -575,14 +580,14 @@ async function decodeArrayBuffer(ab){if(!ctx)buildAudio();return await new Promi
 $('fileBtn').onclick=()=>$('fileInput').click();
 $('fileInput').onchange=async e=>{
 const f=e.target.files[0];if(!f)return;
-try{sceneStatus('Lecture de '+f.name+'…');const ab=await f.arrayBuffer();const buf=await decodeArrayBuffer(ab);const info=infoFromInputs();if(!info.title){info.title=f.name.replace(/\.[^.]+$/,'');$('trackTitle').value=info.title}info.url='';await loadTrackBuffer(buf,info)}
+try{sceneStatus('Lecture de '+f.name+'…');const ab=await f.arrayBuffer();const buf=await decodeArrayBuffer(ab);const info=infoFromInputs();if(!info.title){info.title=f.name.replace(/\.[^.]+$/,'');$('trackTitle').value=info.title}info.url='';info.partner=false;await loadTrackBuffer(buf,info)}
 catch(err){sceneStatus('Impossible de décoder ce fichier audio.')}
 e.target.value='';
 };
 async function loadTrackFromUrl(t){
 ['artistName','trackTitle','artistLink','trackUrl'].forEach((id,k)=>{$(id).value=[t.artist,t.title,t.link,t.url][k]||''});Object.assign(trackInfo,infoFromInputs());
 try{sceneStatus('Téléchargement du titre…');const r=await fetch(t.url);if(!r.ok)throw new Error(r.status);const buf=await decodeArrayBuffer(await r.arrayBuffer());
-await loadTrackBuffer(buf,{artist:t.artist||'',title:t.title||'',link:t.link||'',url:t.url});}
+await loadTrackBuffer(buf,{artist:t.artist||'',title:t.title||'',link:t.link||'',url:t.url,partner:!!t.partner});}
 catch(err){sceneStatus('Téléchargement impossible (le serveur du fichier doit autoriser le CORS).');notify('Titre inaccessible : '+(t.url||''))}
 }
 $('demoBtn').onclick=async()=>{
@@ -591,7 +596,7 @@ sceneStatus('Génération du titre de démonstration…');await new Promise(r=>s
 const sr=ctx.sampleRate,data=ChromaAnalysis.renderDemoTrack(sr,{bpm:124,tonic:5,mode:'major',seconds:32,offset:.3});
 const buf=ctx.createBuffer(1,data.length,sr);buf.copyToChannel(data,0);
 $('artistName').value='CHROMA Test Lab';$('trackTitle').value='Démo 124 BPM';
-await loadTrackBuffer(buf,{artist:'CHROMA Test Lab',title:'Démo 124 BPM',link:$('artistLink').value.trim(),url:''});
+await loadTrackBuffer(buf,{artist:'CHROMA Test Lab',title:'Démo 124 BPM',link:$('artistLink').value.trim(),url:'',partner:false});
 };
 $('resetTrackBtn').onclick=resetTrack;
 ['artistName','trackTitle','artistLink','trackUrl'].forEach(id=>$(id).addEventListener('input',()=>{Object.assign(trackInfo,infoFromInputs());save('chroma-track-info',trackInfo);refreshArtistCard();update()}));
@@ -607,8 +612,8 @@ $('closeScene').onclick=()=>{$('sceneOverlay').classList.add('hidden');if(paused
 (function bootScene(){
 try{const saved=JSON.parse(localStorage.getItem('chroma-track-info')||'null');if(saved){['artistName','trackTitle','artistLink','trackUrl'].forEach((id,k)=>{$(id).value=[saved.artist,saved.title,saved.link,saved.url][k]||''})}}catch(e){}
 const q=new URLSearchParams(location.search);
-if(validLink(q.get('track')||'')){pendingTrack={url:q.get('track'),artist:q.get('artist')||'',title:q.get('title')||'',link:q.get('link')||''};
-const m=document.querySelector('#intro .micro');m.textContent='Piste partagée : '+(pendingTrack.title||'titre')+(pendingTrack.artist?' — '+pendingTrack.artist:'')+'. Le titre se chargera au démarrage.'}
+if(validLink(q.get('track')||'')){pendingTrack={url:q.get('track'),artist:q.get('artist')||'',title:q.get('title')||'',link:q.get('link')||'',partner:q.get('partner')==='1'};
+const m=document.querySelector('#intro .micro');m.textContent=(pendingTrack.partner?'Piste partenaire : ':'Piste partagée : ')+(pendingTrack.title||'titre')+(pendingTrack.artist?' — '+pendingTrack.artist:'')+'. Le titre se chargera au démarrage.'}
 })();
 init(level);
 })();

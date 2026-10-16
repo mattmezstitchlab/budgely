@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0c0d">
+<title>Studio — MUSICBOX · Faites écouter, pas défiler</title>
+<meta name="description" content="Le Studio MUSICBOX : placez un titre, un podcast, une bande-annonce ou un événement dans CHROMA. Vous payez des pistes jouées en entier, jamais des impressions.">
+<link rel="stylesheet" href="../assets/platform.css">
+<style>
+.types{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:6px}
+.type{border:1px solid #3a4537;border-radius:12px;padding:12px 8px;text-align:center;font-size:12px;cursor:pointer;color:#c5cbc6;background:transparent;font:inherit}
+.type.on{border-color:var(--accent);background:#14201a;color:var(--text)}
+.type i{display:block;font-style:normal;font-size:20px;margin-bottom:4px}
+.camp{border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:10px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+.camp b{display:block;font:500 16px 'Space Grotesk',sans-serif}
+.camp small{color:var(--muted);font-size:11px}
+.status{font-size:10px;letter-spacing:1.3px;font-weight:700;color:var(--yellow)}
+.status.live{color:var(--accent)}
+.price{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:40px}
+.price .card b{font:500 34px 'Space Grotesk',sans-serif;display:block;letter-spacing:-1.5px;margin:8px 0 2px}
+.price .card span{font-size:12px;color:var(--muted)}
+.price .card p{font-size:13px;color:#c5cbc6;margin:10px 0 0}
+@media(max-width:900px){.types{grid-template-columns:repeat(2,1fr)}.price{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav">
+<a class="brand" href="../"><span class="brand-mark"><i></i><i></i><i></i><i></i></span>musicbox<small>STUDIO</small></a>
+<nav class="nav-links"><a href="../#principe">Le principe</a><a href="../cote/">La Cote</a><a class="active" href="./">Studio</a><a href="../#economie">Transparence</a></nav>
+<a class="btn primary small" href="../play/">Jouer CHROMA</a>
+</div></header>
+
+<main class="wrap">
+<div class="page-head">
+<div class="eyebrow green">STUDIO PARTENAIRES</div>
+<h1>Faites écouter.<br>Pas défiler.</h1>
+<p>Placez ce qui mérite trois minutes d’attention — un titre, un podcast, une bande-annonce, un événement, une marque portée par un artiste — dans les niveaux de CHROMA. Vous payez des <b>pistes jouées en entier</b>, jamais des impressions. Et chaque piste est marquée <span class="tag sponsor">PARTENAIRE</span>, toujours.</p>
+</div>
+
+<div class="demo-banner"><b>PROTOTYPE</b><span>Le Studio fonctionne (vos campagnes sont enregistrées sur cet appareil et le lien de piste est réel), mais l’inventaire et les estimations sont des <b>données de démonstration</b>. Pendant le pilote, les placements sont gratuits et choisis avec vous.</span></div>
+
+<div class="grid2">
+<form class="card" id="form" autocomplete="off">
+<h2 style="font-size:24px">Nouvelle campagne</h2>
+<div class="field"><label>QUE FAITES-VOUS ÉCOUTER ?</label>
+<div class="types" id="types"></div></div>
+<div class="row2">
+<div class="field"><label for="cArtist">ARTISTE / ORGANISATEUR / MARQUE</label><input id="cArtist" required placeholder="Zoé"></div>
+<div class="field"><label for="cTitle">TITRE</label><input id="cTitle" required placeholder="Nuit Bleue"></div>
+</div>
+<div class="field"><label for="cAudio">URL DU FICHIER AUDIO (MP3/WAV, public, CORS autorisé)</label><input id="cAudio" type="url" required placeholder="https://…/nuit-bleue.mp3"><span class="hint">Il est analysé dans le navigateur du joueur : tempo, premier temps, tonalité. Le niveau se construit dessus.</span></div>
+<div class="field"><label for="cLink">LIEN DE CONVERSION (pré-save, billetterie, boutique, bande-annonce…)</label><input id="cLink" type="url" placeholder="https://…"></div>
+<div class="field"><label>RÉGIONS</label><div class="chips" id="regions"></div></div>
+<div class="field"><label>GENRES (affinité déclarée par les joueurs, jamais déduite)</label><div class="chips" id="genres"></div></div>
+<div class="row2">
+<div class="field"><label for="cBudget">BUDGET (€)</label><input id="cBudget" type="number" min="20" step="10" value="150"></div>
+<div class="field"><label for="cDays">DURÉE (JOURS)</label><input id="cDays" type="number" min="1" max="60" value="14"></div>
+</div>
+<div class="estimate" id="estimate"></div>
+<button class="btn primary" type="submit" style="width:100%;justify-content:center;margin-top:18px">Créer la campagne et obtenir le lien de piste</button>
+<div class="note">En créant une campagne vous confirmez détenir les droits du contenu, et vous acceptez qu’il soit identifié comme partenaire. Pas de ciblage des moins de 15 ans, pas de publicité comportementale, pas de contenu sans bande-son.</div>
+</form>
+
+<div>
+<div class="card">
+<div class="eyebrow">VOS CAMPAGNES</div>
+<div id="campaigns"></div>
+</div>
+<div class="card" style="margin-top:16px" id="dash"></div>
+<div class="rules"><h3>Ce que vous achetez exactement</h3><ul>
+<li><b>Une piste jouée</b> = un niveau de CHROMA terminé sur votre contenu : ≈ 3 minutes, mains sur le morceau. Un niveau abandonné avant 50 % n’est pas facturé.</li>
+<li><b>Le taux « dans le tempo »</b> : part des gestes du joueur calés sur votre beat. C’est une preuve d’attention impossible à simuler par un bot ou un onglet en arrière-plan.</li>
+<li><b>Les partages</b> portent le code du joueur ; <b>les conversions</b> sont attribuées à ce code. Le joueur prescripteur touche une commission sur la vente — jamais sur le clic.</li>
+<li><b>Rien n’est généré ailleurs</b> : aucun stream, aucune vue, aucun clic n’est envoyé vers Spotify, YouTube ou une régie. Votre contenu est écouté ici, et vos fans convertissent chez vous.</li>
+</ul></div>
+</div>
+</div>
+
+<div class="price">
+<div class="card"><span class="eyebrow">PILOTE · 2026</span><b>0 €</b><span>10 partenaires choisis avec nous</span><p>Vous prêtez un titre, on construit le niveau avec vous, vous recevez tout le reporting. Vous nous aidez à prouver le modèle.</p></div>
+<div class="card"><span class="eyebrow">COÛT PAR PISTE JOUÉE</span><b>0,12 €</b><span>tarif indicatif après pilote</span><p>Soit ≈ 40 € pour 1 000 minutes d’écoute attentive. À comparer à un CPM vidéo « vue 2 secondes » — sans commune mesure.</p></div>
+<div class="card"><span class="eyebrow">COULEUR DU JOUR</span><b>Sur devis</b><span>24 h, un seul partenaire, le monde entier</span><p>Votre titre devient la grille unique du jour, partagée en trois lignes par chaque joueur avec votre lien.</p></div>
+</div>
+</main>
+
+<footer class="wrap"><span>MUSICBOX · STUDIO · PILOTE 2026</span><span><a href="../play/">Jouer</a> · <a href="../cote/">La Cote</a> · <a href="../#economie">Transparence</a></span></footer>
+
+<script src="../assets/demo-data.js"></script>
+<script>
+(()=>{
+const D=window.MUSICBOX_DEMO,$=id=>document.getElementById(id);
+const fmt=n=>Math.round(n).toLocaleString('fr'),valid=u=>/^https?:\/\/\S+$/i.test(u||'');
+const TYPES=[['🎵','Titre'],['🎙️','Podcast'],['🎬','Bande-annonce'],['🎪','Événement'],['🏷️','Marque via artiste']];
+let type='Titre',regions=new Set(['Hauts-de-France']),genres=new Set();
+$('types').innerHTML=TYPES.map(t=>'<button type="button" class="type'+(t[1]===type?' on':'')+'" data-t="'+t[1]+'"><i>'+t[0]+'</i>'+t[1]+'</button>').join('');
+$('types').querySelectorAll('button').forEach(b=>b.onclick=()=>{type=b.dataset.t;$('types').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));estimate()});
+function chips(id,list,set){$(id).innerHTML=list.map(x=>'<button type="button" class="chip'+(set.has(x)?' on':'')+'">'+x+'</button>').join('');$(id).querySelectorAll('button').forEach(b=>b.onclick=()=>{set.has(b.textContent)?set.delete(b.textContent):set.add(b.textContent);b.classList.toggle('on');estimate()})}
+chips('regions',D.REGIONS,regions);chips('genres',D.GENRES,genres);
+function inventory(){let plays=0;regions.forEach(r=>plays+=D.inventory[r].plays7);const share=genres.size?Math.min(1,.18+genres.size*.11):1;return Math.round(plays*share)}
+function estimate(){
+const budget=Math.max(0,Number($('cBudget').value)||0),days=Math.max(1,Number($('cDays').value)||1);
+const inv7=inventory(),invTotal=Math.round(inv7/7*days*.25);// on ne vend jamais plus de 25 % de l'inventaire à un partenaire
+const bought=Math.floor(budget/D.cpp),plays=Math.min(bought,invTotal),cost=plays*D.cpp;
+$('estimate').innerHTML='<div class="row2"><div><b>'+fmt(plays)+'</b><span>pistes jouées estimées sur '+days+' jour'+(days>1?'s':'')+' · ≈ '+fmt(plays*2.6)+' minutes d’écoute</span></div><div><b>'+cost.toFixed(0)+' €</b><span>'+(plays<bought?'inventaire limitant : seuls '+cost.toFixed(0)+' € seraient dépensés':'au tarif indicatif de '+D.cpp.toFixed(2)+' € / piste jouée')+'</span></div></div><div class="note" style="margin-top:10px">Inventaire 7 j sur '+regions.size+' région'+(regions.size>1?'s':'')+' : '+fmt(inv7)+' pistes jouées'+(genres.size?' · affinité '+[...genres].join(', '):'')+'. <b>Données de démonstration</b> : l’estimation réelle n’apparaîtra qu’avec l’inventaire mesuré du pilote — nous n’affichons jamais une portée que nous ne pouvons pas prouver.</div>';
+}
+['cBudget','cDays'].forEach(id=>$(id).addEventListener('input',estimate));estimate();
+function load(){try{return JSON.parse(localStorage.getItem('musicbox-campaigns')||'[]')}catch(e){return []}}
+function saveAll(c){try{localStorage.setItem('musicbox-campaigns',JSON.stringify(c))}catch(e){}}
+function trackLink(c){const u=new URL('../play/',location.href);u.searchParams.set('track',c.audio);u.searchParams.set('artist',c.artist);u.searchParams.set('title',c.title);if(valid(c.link))u.searchParams.set('link',c.link);u.searchParams.set('partner','1');return u.toString()}
+function renderCampaigns(){
+const list=load();
+$('campaigns').innerHTML=list.length?list.map((c,i)=>'<div class="camp"><div><b>'+c.title+' <span class="tag sponsor">PARTENAIRE</span></b><small>'+c.artist+' · '+c.type+' · '+c.regions.join(', ')+' · '+c.budget+' € / '+c.days+' j</small><small style="display:block;margin-top:4px;word-break:break-all"><a href="'+c.url+'" target="_blank" rel="noopener">'+c.url+'</a></small></div><div style="text-align:right"><div class="status'+(i===list.length-1?' live':'')+'">'+(i===list.length-1?'PRÊTE · LIEN ACTIF':'ENREGISTRÉE')+'</div><button class="btn ghost small" type="button" data-copy="'+i+'" style="margin-top:8px">Copier le lien</button></div></div>').join(''):'<div class="empty" style="margin-top:12px">Aucune campagne pour l’instant. Créez-en une : le lien de piste fonctionne immédiatement dans CHROMA.</div>';
+$('campaigns').querySelectorAll('[data-copy]').forEach(b=>b.onclick=async()=>{const c=load()[Number(b.dataset.copy)];try{await navigator.clipboard.writeText(c.url);b.textContent='Copié !'}catch(e){prompt('Lien de piste',c.url)}});
+renderDash(list[list.length-1]);
+}
+function renderDash(c){
+const d=$('dash');
+if(!c){d.innerHTML='<div class="eyebrow">TABLEAU DE BORD</div><div class="empty" style="margin-top:12px">Le reporting d’une campagne apparaîtra ici : pistes jouées par jour, minutes, taux dans le tempo, partages, clics, conversions attribuées.</div>';return}
+// demo projection: deterministic from title length
+let s=0;for(const ch of c.title)s=(s*31+ch.charCodeAt(0))>>>0;const r=()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296};
+const days=c.days,planned=c.plays,done=Math.min(days,3);const bars=[];let sum=0;
+for(let i=0;i<days;i++){const v=planned/days*(.6+r()*.8);bars.push({v,proj:i>=done});if(i<done)sum+=v}
+const max=Math.max(...bars.map(b=>b.v));
+d.innerHTML='<div class="eyebrow">TABLEAU DE BORD · '+c.title.toUpperCase()+' <span class="tag" style="margin-left:8px">DÉMO · J+'+done+'</span></div>'+
+'<div class="kpis"><div class="kpi"><span>PISTES JOUÉES</span><b>'+fmt(sum)+'</b><small>sur '+fmt(planned)+' prévues</small></div><div class="kpi"><span>MINUTES</span><b>'+fmt(sum*2.6)+'</b><small>écoute réelle</small></div><div class="kpi"><span>DANS LE TEMPO</span><b>'+Math.round(30+r()*35)+' %</b><small>preuve d’attention</small></div><div class="kpi"><span>CONVERSIONS</span><b>'+fmt(sum*0.012)+'</b><small>'+fmt(sum*0.07)+' partages · '+fmt(sum*0.11)+' clics</small></div></div>'+
+'<div class="bars">'+bars.map(b=>'<i class="'+(b.proj?'proj':'')+'" style="height:'+Math.max(2,b.v/max*100)+'%"></i>').join('')+'</div><div class="legend"><span><i style="background:var(--accent)"></i>réalisé</span><span><i style="background:#2c302c"></i>projection</span></div>'+
+'<div class="note">Dépensé à ce jour : '+(sum*D.cpp).toFixed(2)+' € · Les niveaux abandonnés avant 50 % ne sont pas comptés.</div>';
+}
+$('form').addEventListener('submit',e=>{
+e.preventDefault();
+const c={type,artist:$('cArtist').value.trim(),title:$('cTitle').value.trim(),audio:$('cAudio').value.trim(),link:$('cLink').value.trim(),regions:[...regions],genres:[...genres],budget:Number($('cBudget').value)||0,days:Number($('cDays').value)||1,created:Date.now()};
+if(!valid(c.audio)){alert('L’URL du fichier audio doit commencer par https://');return}
+if(!c.regions.length){alert('Choisissez au moins une région.');return}
+const inv=Math.round(inventory()/7*c.days*.25);c.plays=Math.min(Math.floor(c.budget/D.cpp),inv);
+c.url=trackLink(c);
+const list=load();list.push(c);saveAll(list);renderCampaigns();
+navigator.clipboard?.writeText(c.url).catch(()=>{});
+if($('campaigns').scrollIntoView)$('campaigns').scrollIntoView({behavior:'smooth',block:'start'});
+});
+renderCampaigns();
+})();
+</script>
+</body>
+</html>

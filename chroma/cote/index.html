@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0c0d">
+<title>La Cote — MUSICBOX · Le classement de l'écoute prouvée</title>
+<meta name="description" content="La Cote classe les titres par écoute réelle dans CHROMA : pistes jouées, minutes, taps dans le tempo, partages, conversions. Rien ne s'achète, rien ne se revend.">
+<link rel="stylesheet" href="../assets/platform.css">
+<style>
+.hero-cote{display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:end}
+.method{border:1px solid var(--line);border-radius:18px;padding:20px 22px;background:#0e100f;font-size:13px;color:#c5cbc6}
+.method h3{font-size:16px;margin-bottom:8px}
+.method .f{font-family:ui-monospace,monospace;font-size:12px;color:var(--accent);background:#0b0f0c;border:1px solid #2a332b;border-radius:8px;padding:10px 12px;margin:10px 0}
+.movers{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:26px 0 8px}
+.mover{border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.mover b{display:block;font:500 16px 'Space Grotesk',sans-serif}
+.mover small{color:var(--muted);font-size:11px}
+.mover .delta{font-size:20px}
+.tabs{display:flex;gap:6px;margin:30px 0 10px}
+.tabs button{border:1px solid #3a4537;background:transparent;color:#c5cbc6;border-radius:10px;padding:10px 16px;font:inherit;font-size:13px;cursor:pointer}
+.tabs button.on{background:#1b2420;border-color:var(--accent);color:var(--text)}
+.mine td{font-size:13px}
+.no-market{border:1px solid #4a2f35;background:#1a1012;border-radius:14px;padding:16px 18px;font-size:13px;color:#d4c2c6;margin-top:26px}
+.no-market b{color:#ff8aa6;font-family:'Space Grotesk',sans-serif;font-weight:500}
+@media(max-width:900px){.hero-cote,.movers{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav">
+<a class="brand" href="../"><span class="brand-mark"><i></i><i></i><i></i><i></i></span>musicbox<small>LA COTE</small></a>
+<nav class="nav-links"><a href="../#principe">Le principe</a><a class="active" href="./">La Cote</a><a href="../studio/">Studio</a><a href="../#economie">Transparence</a></nav>
+<a class="btn primary small" href="../play/">Jouer CHROMA</a>
+</div></header>
+
+<main class="wrap">
+<div class="page-head hero-cote">
+<div>
+<div class="eyebrow green">LE CLASSEMENT DE L’ÉCOUTE PROUVÉE</div>
+<h1>La Cote.<br>Ce qui monte, parce que des gens écoutent vraiment.</h1>
+<p>Pas de streams en arrière-plan, pas de likes achetés. La Cote classe les titres joués dans CHROMA selon l’écoute réelle : pistes jouées en entier, taps dans le tempo, partages, conversions. Elle se lit comme un cours — mais rien ne s’achète ni ne se revend.</p>
+</div>
+<div class="method"><h3>Comment la Cote est calculée</h3>
+<div class="f">cote = pistes jouées (7 j) × (1 + taux dans le tempo)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ 0,6 × partages + 6 × conversions</div>
+Une piste jouée = un niveau terminé sur le titre (≈ 3 min). Le taux « dans le tempo » mesure l’attention réelle. Les conversions (pré-save, billet, disque) pèsent lourd : c’est l’écoute qui engage.</div>
+</div>
+
+<div class="demo-banner" id="demoBanner"><b>DONNÉES DE DÉMONSTRATION</b><span>Ces artistes et ces chiffres sont inventés pour montrer l’interface. La Cote réelle démarrera avec les écoutes du pilote. Vos propres parties, elles, sont réelles (onglet « Vos écoutes »).</span></div>
+
+<div class="kpis" id="kpis"></div>
+
+<div class="eyebrow" style="margin-top:30px">EN MOUVEMENT · 7 DERNIERS JOURS</div>
+<div class="movers" id="movers"></div>
+
+<div class="tabs"><button class="on" data-tab="cote">La Cote</button><button data-tab="early">Découvreurs précoces</button><button data-tab="mine">Vos écoutes</button></div>
+<div class="filters" id="filters"></div>
+
+<div class="card" style="padding:6px 10px 10px">
+<table id="table"><thead><tr><th>#</th><th>Titre</th><th>30 jours</th><th>7 j</th><th>Pistes jouées</th><th>Dans le tempo</th><th>Partages</th><th>Conv.</th><th>Cote</th></tr></thead><tbody></tbody></table>
+<div class="empty hidden" id="empty" style="display:none"></div>
+</div>
+
+<div class="no-market"><b>Pourquoi la Cote n’est pas un marché.</b> On nous demande souvent « pourquoi ne pas pouvoir acheter des parts d’un artiste qui monte ? ». Parce qu’à l’instant où une part se revend, les premiers gagnent sur les derniers, l’écoute devient un prétexte, et la plateforme un produit financier régulé. Ici, repérer un artiste tôt donne un statut de <span class="tag early">DÉCOUVREUR</span> et une commission sur les ventes réelles qu’on a provoquées. L’upside vient de la prescription, jamais d’un cours.</div>
+</main>
+
+<footer class="wrap"><span>MUSICBOX · LA COTE · PILOTE 2026</span><span><a href="../play/">Jouer</a> · <a href="../studio/">Studio partenaires</a> · <a href="../#economie">Transparence</a></span></footer>
+
+<script src="../assets/demo-data.js"></script>
+<script>
+(()=>{
+const D=window.MUSICBOX_DEMO,$=id=>document.getElementById(id);
+const fmt=n=>Math.round(n).toLocaleString('fr'),pct=x=>(x>=0?'▲ +':'▼ ')+Math.abs(Math.round(x*100))+' %';
+let tab='cote',genre='Tous',region='Toutes';
+function spark(arr,color){
+const w=120,h=34,max=Math.max(...arr),min=Math.min(...arr);
+const pts=arr.map((v,i)=>(i/(arr.length-1)*w).toFixed(1)+','+(h-2-(v-min)/((max-min)||1)*(h-6)).toFixed(1)).join(' ');
+return '<svg class="spark" viewBox="0 0 '+w+' '+h+'"><polyline fill="none" stroke="'+color+'" stroke-width="1.8" stroke-linejoin="round" points="'+pts+'"/></svg>';
+}
+function kpis(){
+const tot7=D.tracks.reduce((a,t)=>a+t.last7,0),prev7=D.tracks.reduce((a,t)=>a+t.prev7,0),min7=Math.round(tot7*2.6),conv=D.tracks.reduce((a,t)=>a+t.conversions,0),ob=D.tracks.reduce((a,t)=>a+t.onBeat*t.last7,0)/tot7;
+$('kpis').innerHTML=[['PISTES JOUÉES · 7 J',fmt(tot7),'<span class="'+(tot7>=prev7?'up':'down')+'">'+pct((tot7-prev7)/prev7)+'</span> vs 7 j précédents'],['MINUTES D’ÉCOUTE RÉELLE',fmt(min7),'≈ 2,6 min par piste jouée'],['TAUX DANS LE TEMPO',Math.round(ob*100)+' %','taps calés sur le beat'],['CONVERSIONS · 30 J',fmt(conv),'pré-saves, billets, disques']].map(k=>'<div class="kpi"><span>'+k[0]+'</span><b>'+k[1]+'</b><small>'+k[2]+'</small></div>').join('');
+}
+function movers(){
+const up=[...D.tracks].sort((a,b)=>b.delta-a.delta).slice(0,2),down=[...D.tracks].sort((a,b)=>a.delta-b.delta)[0];
+$('movers').innerHTML=[...up,down].map(t=>'<div class="mover"><div><b><span class="sw" style="background:'+t.color+'"></span>'+t.title+'</b><small>'+t.artist+' · '+t.genre+' · '+t.region+'</small></div><div class="delta '+(t.delta>=0?'up':'down')+'">'+pct(t.delta)+'</div></div>').join('');
+}
+function filters(){
+const g=['Tous',...D.GENRES],r=['Toutes',...D.REGIONS];
+$('filters').innerHTML=(tab==='mine'?'':g.map(x=>'<button class="chip'+(x===genre?' on':'')+'" data-g="'+x+'">'+x+'</button>').join('')+'<span style="width:12px"></span>'+r.map(x=>'<button class="chip'+(x===region?' on':'')+'" data-r="'+x+'">'+x+'</button>').join(''));
+$('filters').querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{genre=b.dataset.g;render()});
+$('filters').querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{region=b.dataset.r;render()});
+}
+function rowsCote(){
+let list=D.tracks.filter(t=>(genre==='Tous'||t.genre===genre)&&(region==='Toutes'||t.region===region));
+list=tab==='early'?list.sort((a,b)=>b.early-a.early):list.sort((a,b)=>b.score-a.score);
+return list.map((t,i)=>'<tr><td class="rank">'+(i+1)+'</td><td class="track"><b><span class="sw" style="background:'+t.color+'"></span>'+t.title+(t.sponsored?'<span class="tag sponsor">PARTENAIRE</span>':'')+(tab==='early'?'<span class="tag early">'+t.early+' DÉCOUVREURS</span>':'')+'</b><small>'+t.artist+' · '+t.type+' · '+t.genre+' · '+t.region+' · '+t.bpm+' BPM</small></td><td>'+spark(t.plays,t.color)+'</td><td class="delta '+(t.delta>=0?'up':'down')+'">'+pct(t.delta)+'</td><td class="num">'+fmt(t.last7)+'</td><td class="num">'+Math.round(t.onBeat*100)+' %</td><td class="num">'+fmt(t.shares)+'</td><td class="num">'+fmt(t.conversions)+'</td><td class="num grotesk" style="font-size:17px">'+fmt(t.score)+'</td></tr>').join('');
+}
+function rowsMine(){
+let plays=[];try{plays=JSON.parse(localStorage.getItem('chroma-plays')||'[]')}catch(e){}
+if(!plays.length)return '';
+const by={};plays.forEach(p=>{const k=p.title+'|'+p.artist;(by[k]=by[k]||{title:p.title,artist:p.artist,real:p.real,n:0,wins:0,min:0,ob:0,taps:0,last:0}); const b=by[k];b.n++;b.wins+=p.win?1:0;b.min+=p.minutes||0;b.ob+=p.onBeatTaps||0;b.last=Math.max(b.last,p.t)});
+const list=Object.values(by).sort((a,b)=>b.n-a.n);
+return list.map((t,i)=>'<tr><td class="rank">'+(i+1)+'</td><td class="track"><b>'+t.title+(t.real?'<span class="tag early">VRAI TITRE</span>':'')+'</b><small>'+t.artist+' · dernière partie '+new Date(t.last).toLocaleDateString('fr')+'</small></td><td class="num">'+t.n+' partie'+(t.n>1?'s':'')+'</td><td class="num">'+t.wins+' bouclée'+(t.wins>1?'s':'')+'</td><td class="num">'+t.min.toFixed(1)+' min</td><td class="num">'+t.ob+' taps dans le tempo</td><td></td><td></td><td></td></tr>').join('');
+}
+function render(){
+document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+filters();
+const tb=document.querySelector('#table tbody'),th=document.querySelector('#table thead');
+th.style.display=tab==='mine'?'none':'';
+const html=tab==='mine'?rowsMine():rowsCote();
+tb.innerHTML=html;
+const e=$('empty');e.style.display=html?'none':'block';
+e.textContent=tab==='mine'?'Aucune partie enregistrée sur cet appareil pour l’instant. Jouez une piste dans CHROMA : elle apparaîtra ici, et chargez un vrai titre via « Scène » pour qu’il compte comme écoute prouvée.':'Aucun titre pour ce filtre.';
+$('demoBanner').style.display=tab==='mine'?'none':'flex';
+}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;render()});
+kpis();movers();render();
+})();
+</script>
+</body>
+</html>
