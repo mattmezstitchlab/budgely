@@ -43,12 +43,17 @@ for(let f=0;f<6;f++){const g=new T.Group();g.quaternion.copy(FACE_ROT[f]);root.a
     m.position.set((col-1.5)*GAP,(1.5-row)*GAP,SIZE/2+.03);m.userData={face:f,i};g.add(m);
     const l=new T.Mesh(labelGeo,new T.MeshBasicMaterial({map:labelTex[i],transparent:true,opacity:.5,depthWrite:false,toneMapped:false}));l.position.set(m.position.x,m.position.y,m.position.z+.062);g.add(l);
     pads[f][i]={mesh:m,label:l,face:f,i,scale:1}}}
-function makeLabel(text,color){const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');x.clearRect(0,0,256,256);x.fillStyle=color;x.font='700 58px -apple-system,BlinkMacSystemFont,Inter,Helvetica,Arial,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(text.toUpperCase(),128,132);
+function makeLabel(text,color){const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');x.clearRect(0,0,256,256);x.fillStyle=color;const F='-apple-system,BlinkMacSystemFont,Inter,Helvetica,Arial,sans-serif';x.textAlign='center';x.textBaseline='middle';const up=text.toUpperCase();
+  /* noms longs (« grands-parents », « encouragements ») : on réduit, puis on coupe en deux lignes */
+  let size=58;x.font=`700 ${size}px ${F}`;while(x.measureText(up).width>236&&size>40){size-=2;x.font=`700 ${size}px ${F}`}
+  if(x.measureText(up).width>236&&/[ -]/.test(up)){const i=up.search(/[ -]/);const a=up.slice(0,i+(up[i]==='-'?1:0)).trim(),b=up.slice(i+1).trim();size=Math.min(52,size);x.font=`700 ${size}px ${F}`;while(Math.max(x.measureText(a).width,x.measureText(b).width)>236&&size>34){size-=2;x.font=`700 ${size}px ${F}`}x.fillText(a,128,100);x.fillText(b,128,160)}
+  else{while(x.measureText(up).width>236&&size>30){size-=2;x.font=`700 ${size}px ${F}`}x.fillText(up,128,132)}
   const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.anisotropy=4;return t}
 
 const INSTC=S.INST.map(x=>new T.Color(x.c));
+const colorCache={};function colorOf(i){const h=S.padColor&&S.padColor(i);if(!h)return INSTC[S.PADS[i][0]];return colorCache[h]||(colorCache[h]=new T.Color(h))}
 const DIM=new T.Color(0x1a1a1f);
-export function refresh(){if(S.padNames)relabel(S.padNames());const used=S.used?S.used():null;for(let f=0;f<6;f++){const t=S.TYPES[f],lv=S.proj.pads[t],off=used&&!used.includes(t);for(let i=0;i<16;i++){const p=pads[f][i],l=off?0:lv[i],c=INSTC[S.PADS[i][0]];const mat=p.mesh.material;
+export function refresh(){if(S.padNames)relabel(S.padNames());const used=S.used?S.used():null;for(let f=0;f<6;f++){const t=S.TYPES[f],lv=S.proj.pads[t],off=used&&!used.includes(t);for(let i=0;i<16;i++){const p=pads[f][i],l=off?0:lv[i],c=colorOf(i);const mat=p.mesh.material;
   if(off){mat.color.copy(DIM);mat.emissive.set(0);mat.emissiveIntensity=0;p.label.material.map=labelTex[i];p.label.material.opacity=.14;p.label.material.needsUpdate=true;continue}
   /* éteint : gris mat, nom en blanc discret · présent : couleur pleine, nom sombre · fort : couleur + légère lueur */
   const lm=p.label.material;

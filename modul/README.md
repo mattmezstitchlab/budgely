@@ -41,16 +41,17 @@ Sans serveur, les pages statiques fonctionnent aussi (La Cote et le Studio reste
 | `GET /api/cote` | agrégats 30 j : classement (formule affichée dans la page), inventaire par région, totaux. `real:false` tant qu'il n'y a aucune donnée |
 | `GET /api/health` | — |
 
-### Modes : le moteur ne change pas, ce qu'il pilote si
+### Modes : le moteur ne change pas, ce que les pads règlent si
 
-| Usage | Mode | Faces | Rangées | Panneau de sortie | Export |
+| Usage | Mode | Faces | Pads (4 rangées × 4) | Panneau de sortie | Export |
 |---|---|---|---|---|---|
-| Chanson, jingle, pub, générique, film, berceuse, podcast, jeu, enfants | `music` | sections musicales | batterie / basse / accords / mélodie | — | MIDI, WAV, stems |
-| Mariage, concentration | `program` | moments avec heure et durée (« Dîner 18:45 · 2 h ») | idem | **Déroulé** : liste des moments, moment en cours, temps restant | déroulé `.txt` + extrait musical |
-| Soirée · Lumière | `light` | moments de la soirée | strobes / wash / ambiance / spots | **Scène** : projecteurs qui suivent les pads au tempo | feuille de cues `.csv` |
-| Yoga, sport, méditation | `session` | phases de la séance | rythme / ancrage / souffle / voix | **Séance** : cercle de respiration, consigne, intensité | plan de séance `.txt` |
+| Chanson, jingle, pub, générique, film, berceuse, podcast, jeu, enfants | `music` | sections musicales | instruments (batterie / basse / accords / mélodie) | — | MIDI, WAV, stems |
+| Mariage | `program` | moments avec heure et durée (Arrivée 16:00 · Dîner 2 h…) | **réglages du moment** : ambiance (élégant, festif, romantique, dansant) · invités · moments (discours, entrée, gâteau, surprise) · son (volume, tempo, chant, électro) | **Déroulé** : moments, en cours, temps restant | déroulé `.txt` + extrait musical |
+| Concentration | `program` | mise en route · travail 25 · pause 5… | rythme · ambiance (café, pluie, bibliothèque, nuit) · pauses · son | Déroulé | `.txt` |
+| Soirée · Lumière | `light` | portes · montée · climax · respiration · rappel · sortie | salle (chaud, froid, intensité, brume) · scène (face, contres, mouvants, poursuite) · effets (strobe, laser, blackout, UV) · son | **Scène** animée au tempo | feuille de cues `.csv` |
+| Yoga, sport, méditation | `session` | phases de la séance | souffle (lent, profond, rétention…) · corps · esprit / coach · son | **Séance** : cercle de respiration (avec rétention), consigne, intensité | plan de séance `.txt` |
 
-En mode programme/lumière/séance, chaque moment a un motif de 8 mesures que le moteur boucle pendant la durée réelle du moment ; le chef d'orchestre comprend « le dîner dure 2 h 30 », « commence à 18 h 30 », « première danse plus fort », « le dîner plus doux ».
+Hors musique, les pads ne sont donc plus des instruments : chaque réglage a un effet musical déclaré (`DOMAINS[*].pads[i].fx` : énergie par instrument, volume du moment, tempo, vote de style / mode). La musique du moment en découle ; le tempo, le style et le mode sont votés par l'ensemble des réglages, sauf si l'utilisateur les a fixés à la main (verrou). Chaque moment a un motif de 8 mesures bouclé pendant sa durée réelle ; les exports audio restent sur le motif. Le chef d'orchestre comprend les noms des moments et des réglages : « discours pendant le dîner », « la soirée plus festive », « sans enfants », « blackout au climax », « rétention au repos », « le dîner dure 2 h 30 », « commence à 18 h 30 ».
 
 
 Règles : un niveau abandonné avant 50 % ne compte pas ; identifiant joueur anonyme (code `ref` local) ; pas de cookie, pas d'IP stockée ; 60 écritures/min/IP.
