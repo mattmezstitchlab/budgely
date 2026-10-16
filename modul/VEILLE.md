@@ -20,15 +20,15 @@ Sources : guide Suno Studio 2026 (slstudio.pro), mise à jour Studio février 20
 | **Préréglages par usage** (workout, focus, relax ; intro de podcast ; pub) | Mubert, Soundraw, Beatoven | **Oui** — écran « Que veux-tu créer ? » : 12 usages (jingle, pub, générique, film, sport, yoga, méditation, berceuse, podcast, jeu vidéo, concentration, chanson) qui posent structure, tempo, mode, style et pads |
 | **Humeur / émotion** (16 tags chez Beatoven, humeur par section) | Beatoven, Soundraw | **Oui, simplifié** — 6 ambiances (énergique, calme, lumineux, sombre, épique, chaleureux) qui modifient tempo, mode, gabarit de pads ; par section = les faces du cube |
 | **Longueur ajustable après génération** | Soundraw, Beatoven | **Oui** — « 20 secondes », « 2 minutes » : la structure s'étire ou se resserre section par section |
-| **Prompt en langage naturel qui pilote l'édition** (« change this to a string section ») | Suno Studio (stem swapping), Udio | **Oui, à base de règles** — le chef d'orchestre comprend usage, durée, ambiance, instruments, sections, tempo, tonalité ; prêt à recevoir un modèle de langage |
+| **Prompt en langage naturel qui pilote l'édition** (« change this to a string section ») | Suno Studio (stem swapping), Udio | **Oui** — règles en local + prise pour un modèle de langage côté serveur (`/api/conductor`, actions JSON) ; sans clé, les règles suffisent pour usage, durée, ambiance, instruments, sections, tempo, tonalité, variantes |
 | **Timeline / sections éditables, inpainting d'une section** | Suno Studio, Udio Sessions, Mureka Region Editing | **Oui, autrement** — pas de timeline : une face = une section ; on retouche le refrain sans toucher au couplet |
-| **Stems / pistes séparées, EQ par piste** | Suno Studio 1.2, Udio | **Partiel** — rangées = instruments avec 3 niveaux ; export MIDI 5 pistes ; pas de stems audio séparés (à faire : rendu WAV par instrument) |
+| **Stems / pistes séparées, EQ par piste** | Suno Studio 1.2, Udio | **Oui** — « Exporter les stems » : ZIP avec un WAV par instrument + mix + MIDI ; pas d'EQ par piste (les trois niveaux de pads en tiennent lieu) |
 | **Export MIDI** (rare : AIVA, Suno à 10 crédits) | AIVA, Suno | **Oui, gratuit** — MIDI 5 pistes avec tempo et armure, WAV 44,1 kHz |
 | **Personas (voix constante)** | Suno | Non — MODUL n'a pas de chant, seulement une voix-texture ; hors périmètre volontaire (licence, poids) |
-| **Génération temps réel qui réagit au contexte** (heure, cœur) | Endel, Lyria RealTime | **Partiel** — le moteur joue en temps réel et accepte un changement d'arrangement sans arrêter ; pas de capteurs (idée : mode « infini » pour yoga / méditation) |
-| **Scoring de vidéo** (la musique suit le montage) | Beatoven | Non — idée crédible : glisser une vidéo, poser des marqueurs = changements de face |
-| **Partir d'un site ou d'un slogan** | Jingle Maker, Lyro | Non — idée : coller une URL, en déduire usage + ambiance + nom |
-| **Alternates** (variantes d'une section) | Suno Studio 1.2 | Non — idée simple : « propose une variante du refrain » = nouvelle graine locale à une face |
+| **Génération temps réel qui réagit au contexte** (heure, cœur) | Endel, Lyria RealTime | **Oui, sans capteurs** — mode ∞ sans fin (activé d'office pour yoga, méditation, concentration), changements appliqués à la mesure suivante |
+| **Scoring de vidéo** (la musique suit le montage) | Beatoven | **Oui** — « Caler sur une vidéo… » : la durée fixe la structure, « Marquer » pendant la lecture pose les changements de section, la vidéo joue en synchro |
+| **Partir d'un site ou d'un slogan** | Jingle Maker, Lyro | **Oui** — coller une URL dans le brief : le serveur lit titre + description, nomme le projet et passe le texte au chef d'orchestre |
+| **Alternates** (variantes d'une section) | Suno Studio 1.2 | **Oui** — « variante du refrain » : les piliers restent (kick, basse, accord), le reste est retiré ; « annule » revient en arrière |
 | **Licences claires** | ElevenLabs (Merlin, Kobalt), AIVA Pro | **Oui par construction** — sons CC0 / CC BY crédités, moteur maison, pas d'entraînement sur des œuvres |
 | **Gratuit avec téléchargement** | Google Flow Music | **Oui** — tout est local, pas de crédits |
 
@@ -39,11 +39,12 @@ Sources : guide Suno Studio 2026 (slstudio.pro), mise à jour Studio février 20
 3. **Le temps réel.** On change un pad pendant la lecture, ça change à la mesure suivante. Pas de file d'attente, pas de crédits, pas de 60 secondes d'attente.
 4. **Inclusif.** Pas de mot technique obligatoire : « un jingle de 10 secondes, lumineux » suffit ; les pads ont trois états et ne peuvent pas jouer faux.
 
-## 4. Ce qui manque pour tenir la comparaison (dans l'ordre)
+## 4. État (16 octobre 2026)
 
-1. **Qualité sonore** : plus de banques (orchestre, cordes, piano feutré pour film / berceuse / méditation), un vrai mastering de sortie. Aujourd'hui 4 styles.
-2. **Stems audio** par instrument à l'export (facile avec le moteur hors-ligne).
-3. **Variantes** d'une face (« propose autre chose pour le refrain »).
-4. **Mode infini** pour yoga / méditation / concentration (le moteur sait déjà boucler).
-5. **Un modèle de langage** derrière le chef d'orchestre pour les formulations libres — l'interface est prête (`conductor(texte)`), les règles restent en secours.
-6. **Scoring vidéo** et **brief depuis une URL**.
+Fait : trois styles acoustiques de plus (Cinéma, Doux, Ambiant — violon, violoncelle, harpe, flûte, CC BY 3.0), normalisation de sortie, stems ZIP, variantes + annuler, mode sans fin, calage vidéo, brief depuis une URL, prise pour un modèle de langage côté serveur.
+
+Reste, honnêtement :
+1. **Le son** reste celui d'un moteur à échantillons : propre, juste, mais sans l'épaisseur d'un rendu neuronal. Prochain pas : plus de notes par instrument (aujourd'hui 4–5 par banque), des articulations (pizzicato, trémolo), un piano feutré enregistré plutôt qu'un filtre.
+2. **Le modèle de langage** n'est pas fourni : il faut une clé (`MODUL_LLM_URL`, `MODUL_LLM_KEY`). Sans lui, les formulations très libres tombent sur les règles.
+3. **Le brief depuis une URL** dépend de l'accès internet du serveur (bloqué dans l'environnement de développement actuel — testé seulement en erreur propre).
+4. Pas de chant, pas de paroles : choix assumé (licence, poids, crédibilité).

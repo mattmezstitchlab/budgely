@@ -17,15 +17,19 @@ const NOUN=['Marée','Orage','Rivage','Comète','Verre','Nuit','Boulevard','Fiè
 
 /* ---------- styles : un style = un tempo, un kit, des voix, des motifs ---------- */
 const KITS={ac:{bd:'ac_bd',sd:'ac_sd',hh:'ac_hh',oh:'ac_oh',cr:'ac_cr',cp:'pc_clap',rim:'808_rim'},el:{bd:'el_bd',sd:'el_sd',hh:'el_hh',oh:'el_oh',cr:'el_cr',cp:'el_cp',rim:'el_rim'},'808':{bd:'808_bd',sd:'808_sd',hh:'808_hh',oh:'808_oh',cr:'808_cr',cp:'808_cp',rim:'808_rim'}};
-const TONAL={piano:{dir:'piano',notes:{C3:48,Fs3:54,C4:60,Fs4:66,C5:72}},ebass:{dir:'bass',notes:{E2:40,As2:46,Cs3:49}},guitar:{dir:'guitar',notes:{C3:48,Ds3:51,Fs3:54,A3:57,C4:60,Ds4:63,Fs4:66}},bells:{dir:'bells',notes:{G5:79,C6:84,G6:91,C7:96}}};
+const TONAL={piano:{dir:'piano',notes:{C3:48,Fs3:54,C4:60,Fs4:66,C5:72}},ebass:{dir:'bass',notes:{E2:40,As2:46,Cs3:49}},guitar:{dir:'guitar',notes:{C3:48,Ds3:51,Fs3:54,A3:57,C4:60,Ds4:63,Fs4:66}},bells:{dir:'bells',notes:{G5:79,C6:84,G6:91,C7:96}},
+  violin:{dir:'violin',notes:{G3:55,C4:60,G4:67,C5:72,G5:79}},cello:{dir:'cello',notes:{C2:36,A2:45,C3:48,A3:57,C4:60}},harp:{dir:'harp',notes:{C3:48,E3:52,A4:69,C5:72,E5:76}},flute:{dir:'flute',notes:{C5:72,E5:76,A5:81,C6:84}}};
 const STYLES={
   pop:  {n:'Pop',   d:'Piano, guitare, batterie acoustique', g:'linear-gradient(90deg,#4cc9f0,#00ed8b)', bpm:[104,118],minorP:.45,kit:'ac', bass:'ebass',chords:'piano',lead:'guitar',voice:'choir',  perc:['808_sh','pc_clap','808_rim'],swing:0,  half:false,seventh:false},
   house:{n:'House', d:'Kick droit, piano stabs, voix coupées',g:'linear-gradient(90deg,#a78bfa,#ff5fa2)', bpm:[122,126],minorP:.6, kit:'el', bass:'synth',chords:'stab', lead:'pluck', voice:'formant',perc:['808_sh','808_cb','808_rim'],swing:0,  half:false,seventh:true},
   trap: {n:'Trap',  d:'808, hats rapides, cloches',           g:'linear-gradient(90deg,#ff4f5e,#ffd166)', bpm:[70,78],  minorP:.9, kit:'808',bass:'sub',  chords:'dark', lead:'bells', voice:'choir',  perc:['808_rim','pc_snap','808_cb'],swing:0,  half:true, seventh:false},
-  lofi: {n:'Lo-fi', d:'Accords jazz, souffle, douceur',       g:'linear-gradient(90deg,#ffd166,#a78bfa)', bpm:[76,88],  minorP:.5, kit:'ac', bass:'ebass',chords:'piano7',lead:'guitar',voice:'choir', perc:['pc_snap','pc_ta','808_sh'], swing:.58,half:false,seventh:true,tex:'tx_hiss',lp:3800}
+  lofi: {n:'Lo-fi', d:'Accords jazz, souffle, douceur',       g:'linear-gradient(90deg,#ffd166,#a78bfa)', bpm:[76,88],  minorP:.5, kit:'ac', bass:'ebass',chords:'piano7',lead:'guitar',voice:'choir', perc:['pc_snap','pc_ta','808_sh'], swing:.58,half:false,seventh:true,tex:'tx_hiss',lp:3800},
+  cinema:{n:'Cinéma',d:'Cordes, harpe, violon, souffle',     g:'linear-gradient(90deg,#4cc9f0,#a78bfa)', bpm:[66,80],  minorP:.7, kit:'ac', bass:'cello',chords:'strings',lead:'violin',voice:'choir',perc:['pc_ta','808_sh','pc_snap'],swing:0,  half:false,seventh:false,soft:true},
+  doux:  {n:'Doux',  d:'Piano feutré, harpe, flûte',          g:'linear-gradient(90deg,#ffd166,#ff5fa2)', bpm:[62,76],  minorP:.3, kit:'ac', bass:'cello',chords:'felt',   lead:'flute', voice:'choir',perc:['808_sh','pc_ta','pc_snap'],swing:.54,half:false,seventh:true, lp:3200,soft:true},
+  ambient:{n:'Ambiant',d:'Nappes de cordes, voix lointaines', g:'linear-gradient(90deg,#00ed8b,#4cc9f0)', bpm:[56,66],  minorP:.5, kit:'ac', bass:'cello',chords:'strings',lead:'flute', voice:'choir',perc:['808_sh','pc_ta','pc_snap'],swing:0,  half:false,seventh:true, lp:2600,soft:true,tex:'tx_hiss'}
 };
 function filesFor(st){const S=STYLES[st];const f=new Set(Object.values(KITS[S.kit]));S.perc.forEach(x=>f.add(x));if(S.voice==='choir')f.add('tx_choir');if(S.tex)f.add(S.tex);
-  const list=[...f].map(k=>['drums/'+k,k]);const tonal=[S.bass,S.chords.startsWith('piano')||S.chords==='stab'||S.chords==='dark'?'piano':null,S.lead].filter(x=>TONAL[x]);
+  const list=[...f].map(k=>['drums/'+k,k]);const tonal=[S.bass,S.chords.startsWith('piano')||S.chords==='stab'||S.chords==='dark'||S.chords==='felt'?'piano':null,S.chords==='strings'?'violin':null,S.chords==='strings'?'harp':null,S.lead].filter(x=>TONAL[x]);
   tonal.forEach(tn=>Object.keys(TONAL[tn].notes).forEach(n=>list.push([TONAL[tn].dir+'/'+n,tn+'/'+n])));return list}
 
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -166,13 +170,18 @@ function drum(kind,t,v,S){const k=KITS[S.kit][kind];rec(9,GM[kind]||37,t,.1,v);
   if(kind==='cr'){if(!smp(k,t,v*.6,{send:true}))crashS(t,v);return}
   if(kind==='rim'){if(!smp(k,t,v,{send:true}))shakerS(t,v)}}
 function perc(i,t,v,S){const k=S.perc[i%S.perc.length];rec(9,[70,75,56][i%3],t,.1,v);if(!smp(k,t,v,{send:i>0,dur:k.includes('sh')?.09:undefined}))shakerS(t,v)}
-function playBass(d,t,m,dur,v,bright,slideTo){const b=d.S.bass;rec(1,m,t,dur,v);if(b==='ebass'&&tonal('ebass',m,t,dur,v*1.3,{send:false,lp:d.S.lp?2500:undefined}))return;if(b==='sub'){sub808(t,m-12,dur,v*1.1,slideTo);return}bassS(t,m,dur,v,bright)}
+function playBass(d,t,m,dur,v,bright,slideTo){const b=d.S.bass;rec(1,m,t,dur,v);if(b==='cello'&&tonal('cello',m,t,Math.max(dur*1.6,.6),v*1.15,{send:true,rel:.5,lp:d.S.lp?2200:undefined}))return;if(b==='ebass'&&tonal('ebass',m,t,dur,v*1.3,{send:false,lp:d.S.lp?2500:undefined}))return;if(b==='sub'){sub808(t,m-12,dur,v*1.1,slideTo);return}bassS(t,m,dur,v,bright)}
 function playChord(d,t,notes,dur,v,bright,kind){const c=d.S.chords;notes.forEach(m=>rec(2,m,t,dur,v));
   if(c==='piano'||c==='piano7'){if(notes.every(m=>tonal('piano',m,t,dur,v*(c==='piano7'?.8:.9)/Math.sqrt(notes.length),{lp:c==='piano7'?2600:undefined,pan:(m%7-3)*.1})))return;padS(t,notes,dur,v,bright);return}
   if(c==='stab'){if(kind==='stab'){if(notes.every(m=>tonal('piano',m,t,.28,v*.9/Math.sqrt(notes.length),{rel:.08})))return;stabS(t,notes,v);return}padS(t,notes,dur,v*.6,bright);return}
+  if(c==='felt'){if(notes.every(m=>tonal('piano',m,t,dur*1.2,v*.75/Math.sqrt(notes.length),{lp:1500,pan:(m%7-3)*.08,rel:.5})))return;padS(t,notes,dur,v*.7,1200);return}
+  if(c==='strings'){/* nappe de violons + arpège de harpe sur les accords tenus */
+    const ok=notes.every(m=>tonal('violin',m,t+.01*(m%3),Math.max(dur*1.4,1),v*.55/Math.sqrt(notes.length),{send:true,rel:.9,pan:(m%7-3)*.12,lp:d.S.lp}));
+    if(kind==='pad'||kind==='stab')notes.forEach((m,i)=>tonal('harp',m+(kind==='stab'?12:0),t+i*.07,dur,v*.6/Math.sqrt(notes.length),{send:true,rel:.6,pan:(i-1.5)*.2}));
+    if(ok)return;padS(t,notes,dur,v*.7,bright);return}
   if(c==='dark'){padS(t,notes,dur,v,Math.min(bright,1600));if(kind==='pad')tonal('piano',notes[0]-12,t,dur,v*.5,{lp:1800});return}
   padS(t,notes,dur,v,bright)}
-function playLead(d,t,m,dur,v){const l=d.S.lead;rec(3,m,t,dur,v);if(l==='guitar'&&tonal('guitar',m-12,t,dur*1.6,v*1.1,{dly:true,lp:d.S.lp?3200:undefined}))return;if(l==='bells'&&tonal('bells',m,t,dur*2,v*.9,{dly:true}))return;pluckS(t,m,dur,v)}
+function playLead(d,t,m,dur,v){const l=d.S.lead;rec(3,m,t,dur,v);if(l==='violin'&&tonal('violin',m,t,Math.max(dur*1.5,.8),v*.85,{send:true,rel:.6,dly:true}))return;if(l==='flute'&&tonal('flute',m,t,Math.max(dur*1.3,.5),v*.8,{send:true,rel:.35,dly:true}))return;if(l==='guitar'&&tonal('guitar',m-12,t,dur*1.6,v*1.1,{dly:true,lp:d.S.lp?3200:undefined}))return;if(l==='bells'&&tonal('bells',m,t,dur*2,v*.9,{dly:true}))return;pluckS(t,m,dur,v)}
 function playVoice(d,t,m,dur,v,vowel){rec(4,m,t,dur,v);if(d.S.voice==='choir'&&SMP['tx_choir']){smp('tx_choir',t,v*1.2,{rate:Math.pow(2,((m%12)-7)/12),dur,rel:.3,bus:busMusic,send:true,pan:(vowel%2?.3:-.3)});return}formantS(t,m,dur,v,vowel)}
 
 /* ============================ MOTEUR ============================ */
@@ -287,10 +296,12 @@ async function renderTrack(t,onProgress){
   ({ctx,master,comp,busDrum,kitFilter,busMusic,busSend,verb,noise}=saved);Object.assign(engine,saved.engine,{on:false,offline:false});if(wasOn)engine.on=false;
   return {buffer,notes,desc};
 }
+function peakOf(buf){let p=0;for(let c=0;c<buf.numberOfChannels;c++){const d=buf.getChannelData(c);for(let i=0;i<d.length;i++){const a=Math.abs(d[i]);if(a>p)p=a}}return p}
 function wavBlob(buf){const n=buf.length,ch=buf.numberOfChannels,sr=buf.sampleRate,out=new DataView(new ArrayBuffer(44+n*ch*2));
   const w=(o,s)=>{for(let i=0;i<s.length;i++)out.setUint8(o+i,s.charCodeAt(i))};
   w(0,'RIFF');out.setUint32(4,36+n*ch*2,true);w(8,'WAVE');w(12,'fmt ');out.setUint32(16,16,true);out.setUint16(20,1,true);out.setUint16(22,ch,true);out.setUint32(24,sr,true);out.setUint32(28,sr*ch*2,true);out.setUint16(32,ch*2,true);out.setUint16(34,16,true);w(36,'data');out.setUint32(40,n*ch*2,true);
-  const d=[];for(let c=0;c<ch;c++)d.push(buf.getChannelData(c));let o=44;for(let i=0;i<n;i++)for(let c=0;c<ch;c++){const x=Math.max(-1,Math.min(1,d[c][i]));out.setInt16(o,x<0?x*32768:x*32767,true);o+=2}
+  const d=[];for(let c=0;c<ch;c++)d.push(buf.getChannelData(c));const pk=peakOf(buf),gain=pk>0?Math.min(4,.891/pk):1;/* normalisation : crête à −1 dBFS */
+  let o=44;for(let i=0;i<n;i++)for(let c=0;c<ch;c++){const x=Math.max(-1,Math.min(1,d[c][i]*gain));out.setInt16(o,x<0?x*32768:x*32767,true);o+=2}
   return new Blob([out],{type:'audio/wav'})}
 /* SMF type 1 : piste tempo + une piste par canal (basse, accords, mélodie, voix, batterie GM) */
 function midiBlob(notes,desc,bars){
@@ -310,6 +321,16 @@ function midiBlob(notes,desc,bars){
   const head=[0,1,(tracks.length>>8)&255,tracks.length&255,(PPQ>>8)&255,PPQ&255];
   const bytes=[...chunk('MThd',head)];tracks.forEach(tr=>bytes.push(...chunk('MTrk',tr)));
   return new Blob([new Uint8Array(bytes)],{type:'audio/midi'})}
+/* ZIP minimal (stockage, CRC-32) pour livrer les stems en un fichier */
+const CRC_T=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc32(u8){let c=0xFFFFFFFF;for(let i=0;i<u8.length;i++)c=CRC_T[(c^u8[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0}
+async function zipBlob(files){/* files: [{name,blob}] */const enc=new TextEncoder();const parts=[],central=[];let off=0;
+  for(const f of files){const data=new Uint8Array(await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsArrayBuffer(f.blob)}));const name=enc.encode(f.name),crc=crc32(data);
+    const h=new DataView(new ArrayBuffer(30));h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x800,true);h.setUint16(8,0,true);h.setUint16(10,0,true);h.setUint16(12,0x21,true);h.setUint32(14,crc,true);h.setUint32(18,data.length,true);h.setUint32(22,data.length,true);h.setUint16(26,name.length,true);h.setUint16(28,0,true);
+    const c=new DataView(new ArrayBuffer(46));c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x800,true);c.setUint16(10,0,true);c.setUint16(12,0,true);c.setUint16(14,0x21,true);c.setUint32(16,crc,true);c.setUint32(20,data.length,true);c.setUint32(24,data.length,true);c.setUint16(28,name.length,true);c.setUint32(42,off,true);
+    parts.push(h,name,data);central.push(c,name);off+=30+name.length+data.length}
+  const cdSize=central.reduce((a,x)=>a+(x.byteLength||x.length),0);const e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cdSize,true);e.setUint32(16,off,true);e.setUint16(20,0,true);
+  return new Blob([...parts,...central,e],{type:'application/zip'})}
 function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}
 
 /* Reconstitue, sans audio, l'énergie moyenne de chaque instrument par type de section à partir du journal des tapes. */

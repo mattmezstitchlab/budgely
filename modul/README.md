@@ -32,6 +32,8 @@ Sans serveur, les pages statiques fonctionnent aussi (La Cote et le Studio reste
 | Route | Rôle |
 |---|---|
 | `POST /api/tracks` | un projet du studio partagé : nom, graine, BPM, tonalité, mesures, arrangement (`arr`), réglages (`over`), pads — permet la réécoute exacte par lien |
+| `POST /api/conductor` | `{text,state}` → `{llm,actions,reply}` ; `{llm:false}` si aucun modèle n'est configuré |
+| `GET /api/brief?url=` | titre, description, site, langue d'une page (brief depuis une URL) |
 | `GET /api/tracks?id=` | détail d'un projet partagé (ouvert par `play/?t=<id>`) ; `?limit=` liste les anciens morceaux de jeu s'il en reste |
 | `POST /api/plays` | une piste jouée, envoyée par le jeu à la fin d'un niveau (titre, artiste, réussite, récolte, taps dans le tempo, minutes, région déclarée) |
 | `POST /api/events` | `share` / `click` / `conversion` sur un titre |
@@ -53,7 +55,9 @@ Le studio n'ajoute pas d'interface de DAW : tout est dans le cube. Une face = un
 
 La vue est en vraie 3D (WebGL, three.js) : on attrape le cube au doigt ou à la souris, on le retourne, il retombe sur la face la plus proche ; un tap sur un pad l'allume. Sans WebGL, la page reste utilisable (chef d'orchestre, transport, exports). Pour régénérer le bundle : `npx esbuild entry.js --bundle --minify --format=esm --outfile=play/vendor/three.bundle.js` avec un `entry.js` qui ré-exporte `three` et les cinq addons listés ci-dessus.
 
-Le « chef d'orchestre » est un analyseur de commandes en français **à base de règles** (instruments, sections, plus fort / moins fort / retire, N bpm, mineur / majeur, styles, « surprends-moi », « vide ») — pas un modèle de langage. L'interface est prête à en brancher un : une fonction `conductor(texte)` qui modifie `proj.pads` / `proj.over`.
+**Sept styles** : Pop, House, Trap, Lo-fi, Cinéma (violons, violoncelle, harpe), Doux (piano feutré, harpe, flûte), Ambiant (nappes de cordes, souffle). **Exports** : MIDI 5 pistes, WAV normalisé (crête −1 dBFS), **stems** (ZIP : une piste WAV par instrument + mix + MIDI, sans dépendance). **Sans fin** (∞) : lecture infinie pour yoga, méditation, concentration. **Variantes** (« variante du refrain ») et **Annuler**. **Vidéo** : charger une vidéo cale la durée de la musique dessus, « Marquer » pendant la lecture pose les changements de section. **Brief depuis une URL** : coller un lien dans le brief, le serveur lit titre + description (`GET /api/brief?url=`) pour nommer et orienter le projet.
+
+Le « chef d'orchestre » est un analyseur de commandes en français **à base de règles** (instruments, sections, plus fort / moins fort / retire, N bpm, mineur / majeur, styles, « surprends-moi », « vide ») — pas un modèle de langage. Un modèle de langage se branche sans toucher au client : `MODUL_LLM_URL` (API compatible OpenAI chat/completions), `MODUL_LLM_KEY`, `MODUL_LLM_MODEL` sur le serveur → `POST /api/conductor` renvoie des actions JSON (`use`, `seconds`, `bpm`, `mode`, `root`, `style`, `pads`, `variant`, `clear`, `undo`, `loop`) que le studio applique (`applyActions`). Sans clé, le serveur répond `{llm:false}` et les règles prennent le relais.
 
 ## Retiré
 

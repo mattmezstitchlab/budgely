@@ -15,6 +15,15 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {DatabaseSync} from 'node:sqlite';
 import zlib from 'node:zlib';
+const LLM_URL=process.env.MODUL_LLM_URL||'';
+const LLM_SYSTEM=`Tu es le chef d'orchestre de MODUL, un studio de musique où un cube a 6 faces (sections : Intro, Couplet, Pré-refrain, Refrain, Pont, Final) et 6 instruments (0 batterie, 1 basse, 2 accords, 3 mélodie, 4 percussions, 5 voix).
+Réponds UNIQUEMENT en JSON : {"reply":"phrase courte en français","actions":[...]}. Actions possibles :
+{"op":"use","use":"jingle|pub|generic|film|sport|yoga|medit|lullaby|podcast|game|focus|song","mood":"energique|calme|lumineux|sombre|epique|chaleureux|null"}
+{"op":"seconds","v":30} {"op":"bpm","v":120} {"op":"mode","v":"major|minor"} {"op":"root","v":0-11} {"op":"style","v":"pop|house|trap|lofi|cinema|doux|ambient"}
+{"op":"pads","section":"Refrain|all","inst":0-5,"level":0|1|2} ou {"op":"pads","section":"Couplet","inst":4,"delta":-1}
+{"op":"variant","section":"Refrain"} {"op":"clear"} {"op":"undo"} {"op":"loop","v":true}
+Sois sobre : seulement les actions demandées.`;
+const decodeEnt=x=>x.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;|&apos;/g,"'").replace(/&nbsp;/g,' ');
 
 const __dirname=path.dirname(fileURLToPath(import.meta.url));
 const ROOT=path.resolve(__dirname,'..');
@@ -103,7 +112,33 @@ const server=http.createServer(async(req,res)=>{
 try{
 const url=new URL(req.url,'http://x');const p=url.pathname;const ip=req.headers['x-forwarded-for']?.split(',')[0]||req.socket.remoteAddress||'?';
 if(req.method==='OPTIONS')return send(res,204,'');
-if(p==='/api/health')return send(res,200,{ok:true,ts:Date.now()});
+if(p==='/api/health')return send(res,200,{ok:true,ts:Date.now(),llm:!!LLM_URL});
+/* Chef d'orchestre : si un modèle de langage est configuré (MODUL_LLM_URL + MODUL_LLM_KEY, API compatible OpenAI chat/completions),
+   on lui demande une liste d'actions JSON ; sinon {llm:false} et le studio applique ses règles. */
+if(p==='/api/conductor'&&req.method==='POST'){
+  if(!LLM_URL)return send(res,200,{llm:false});
+  if(!allow(ip))return send(res,429,{error:'trop de requêtes'});
+  const b=await readJson(req);const text=str(b.text,400);if(!text)return send(res,400,{error:'text requis'});
+  try{const ctrl=new AbortController();const to=setTimeout(()=>ctrl.abort(),8000);
+    const r=await fetch(LLM_URL,{method:'POST',signal:ctrl.signal,headers:{'Content-Type':'application/json','Authorization':'Bearer '+process.env.MODUL_LLM_KEY},
+      body:JSON.stringify({model:process.env.MODUL_LLM_MODEL||'gpt-4o-mini',temperature:.2,response_format:{type:'json_object'},messages:[{role:'system',content:LLM_SYSTEM},{role:'user',content:JSON.stringify({demande:text,etat:b.state||{}})}]})});
+    clearTimeout(to);const j=await r.json();const content=j.choices?.[0]?.message?.content||'{}';const out=JSON.parse(content);
+    return send(res,200,{llm:true,actions:Array.isArray(out.actions)?out.actions.slice(0,20):[],reply:str(out.reply,300)||''})}
+  catch(e){return send(res,200,{llm:false,error:'modèle indisponible'})}
+}
+/* Brief depuis une URL : titre + description de la page (pour en déduire usage, ambiance et nom) */
+if(p==='/api/brief'&&req.method==='GET'){
+  const u=url.searchParams.get('url')||'';if(!/^https?:\/\//i.test(u))return send(res,400,{error:'url requise'});
+  if(!allow(ip))return send(res,429,{error:'trop de requêtes'});
+  try{const ctrl=new AbortController();const to=setTimeout(()=>ctrl.abort(),6000);const r=await fetch(u,{signal:ctrl.signal,headers:{'User-Agent':'MODUL/1.0 (+brief)','Accept':'text/html'},redirect:'follow'});clearTimeout(to);
+    const html=(await r.text()).slice(0,200000);const pick=re=>{const m=html.match(re);return m?(m[2]??m[1]).replace(/\s+/g,' ').trim():''};
+    const meta=(attr,val)=>pick(new RegExp('<meta[^>]+'+attr+'=["\']'+val+'["\'][^>]+content=(["\'])(.*?)\\1','i'))||pick(new RegExp('<meta[^>]+content=(["\'])(.*?)\\1[^>]+'+attr+'=["\']'+val+'["\']','i'));
+    const title=meta('property','og:title')||pick(/<title[^>]*>([^<]+)<\/title>/i);
+    const description=meta('name','description')||meta('property','og:description');
+    const site=meta('property','og:site_name');const lang=pick(/<html[^>]+lang=["']([a-zA-Z-]+)/i);
+    return send(res,200,{url:u,title:decodeEnt(title).slice(0,120),description:decodeEnt(description).slice(0,400),site:decodeEnt(site).slice(0,80),lang})}
+  catch(e){return send(res,200,{url:u,error:'page inaccessible depuis ce serveur'})}
+}
 if(p==='/api/cote'&&req.method==='GET')return send(res,200,cote());
 if(p==='/api/plays'&&req.method==='POST'){
   if(!allow(ip))return send(res,429,{error:'trop de requêtes'});
