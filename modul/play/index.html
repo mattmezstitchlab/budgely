@@ -90,6 +90,11 @@ svg.trail path.chain{stroke:rgba(255,255,255,.35);stroke-width:2;stroke-dasharra
 h1.title{font-size:34px;font-weight:700;letter-spacing:-.035em;line-height:1.05}
 .meta{color:var(--mute);font-size:16px;margin:8px 0 26px;line-height:1.4}.meta b{color:var(--fg);font-weight:600}
 .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}.rank{margin-top:22px;font-size:14px;color:var(--mute)}
+.btn.small{height:40px;padding:0 18px;font-size:15px}
+.sheetinfo{margin-top:22px;width:100%;max-width:380px;text-align:left;font-size:13.5px;line-height:1.5;color:var(--mute);border-top:1px solid var(--line);padding-top:14px}
+.sheetinfo b{color:var(--fg);font-weight:600}.sheetinfo .r{display:flex;justify-content:space-between;gap:12px;padding:3px 0}.sheetinfo .r span:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.toggle{display:flex;gap:6px;background:rgba(255,255,255,.08);border-radius:980px;padding:4px;margin:0 0 18px}
+.toggle button{padding:8px 16px;border-radius:980px;font-size:14px;font-weight:600;color:var(--mute)}.toggle button.on{background:var(--fg);color:#000}
 .list{width:100%;margin-top:8px}.item{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);width:100%;text-align:left}
 .item .sq{width:56px;height:56px;border-radius:14px;flex:none;background:var(--cover)}.item .n{font-weight:600;font-size:17px}.item .m{color:var(--mute);font-size:14px;margin-top:2px}.item .d{margin-left:auto;font-weight:600;font-variant-numeric:tabular-nums}
 .head{width:100%;display:flex;align-items:center;justify-content:space-between;height:44px}.head h2{font-size:22px;font-weight:700}
@@ -110,9 +115,10 @@ h1.title{font-size:34px;font-weight:700;letter-spacing:-.035em;line-height:1.05}
   <div class="logo">MODUL</div>
   <p class="tag">Un cube. Six faces.<br>Suis l’onde, trace la phrase,<br>fais durer le morceau.</p>
   <div class="styles" id="styles"></div>
+  <div class="toggle" id="mode"><button data-m="1">Module du jour</button><button data-m="0">Libre</button></div>
   <button class="btn" id="btnPlay">Jouer</button>
   <div class="loading" id="loading"></div>
-  <div class="links"><button class="link" id="btnList">Mes morceaux</button><button class="link" id="btnHow">Comment jouer</button><a class="link" href="../play/">CHROMA</a></div>
+  <div class="links"><button class="link" id="btnList">Mes morceaux</button><button class="link" id="btnHow">Comment jouer</button></div>
   <div class="best" id="best"></div>
 </section>
 
@@ -141,10 +147,14 @@ h1.title{font-size:34px;font-weight:700;letter-spacing:-.035em;line-height:1.05}
   <div class="meta" id="tMeta"></div>
   <div class="actions"><button class="btn" id="btnReplay">Réécouter</button><button class="btn ghost" id="btnAgain">Rejouer</button></div>
   <div class="rank" id="rank"></div>
+  <div class="sheetinfo" id="sheet"></div>
+  <div class="actions" style="margin-top:18px"><button class="btn ghost small" id="btnMidi">MIDI</button><button class="btn ghost small" id="btnWav">WAV</button><button class="btn ghost small" id="btnShare">Partager</button></div>
+  <div class="small" id="exportInfo" style="margin-top:10px;height:18px;font-size:13px;color:var(--mute)"></div>
 </section>
 
 <section id="list" class="screen hidden">
-  <div class="head"><h2>Mes morceaux</h2><button class="icon" id="btnBack">✕</button></div>
+  <div class="head"><h2>Playlist</h2><button class="icon" id="btnBack">✕</button></div>
+  <div class="toggle" id="tabs"><button class="on" data-tab="mine">Mes morceaux</button><button data-tab="daily">Top du jour</button><button data-tab="top">Top 30 jours</button></div>
   <div class="list" id="items"></div>
 </section>
 
@@ -167,7 +177,15 @@ const PADS=[[0,'kick','Kick'],[0,'snare','Snare'],[4,'hat','Hat'],[0,'crash','Cr
             [2,'chord','Accord'],[2,'stab','Stab'],[2,'high','Aigu'],[2,'pad','Nappe'],
             [3,'n1','Note 1'],[3,'n2','Note 2'],[3,'n3','Note 3'],[5,'voice','Voix']];
 /* phrases du chef d'orchestre : la suite logique par section (indices de pads), une onde par temps */
-const PHRASE={Intro:[8,11,8,10],Couplet:[0,4,1,5,0,6,1,4],'Pré-refrain':[0,8,4,1,0,9,5,12],Refrain:[0,4,8,12,1,5,9,13,0,6,10,14,1,7,9,15],Pont:[11,12,15,13,11,14,15,12],Final:[0,4,8,12,1,5,9,15,3,6,10,14,2,7,11,13]};
+const PHRASE={
+  Intro:[[8,11,8,10],[11,8,10,8]],
+  Couplet:[[0,4,1,5,0,6,1,4],[0,4,0,1,4,6,1,5]],
+  'Pré-refrain':[[0,8,4,1,0,9,5,12],[4,8,0,1,5,9,0,13]],
+  Refrain:[[0,4,8,12,1,5,9,13,0,6,10,14,1,7,9,15],[0,8,4,12,1,9,5,13,0,10,6,14,1,15,7,9]],
+  Pont:[[11,12,15,13,11,14,15,12],[11,15,12,14,11,13,15,12]],
+  Final:[[0,4,8,12,1,5,9,15,3,6,10,14,2,7,11,13],[0,8,4,12,1,9,5,15,2,10,6,14,3,11,7,13]]};
+const ORDER={Intro:'Pose les accords',Couplet:'Verrouille kick et basse',"Pré-refrain":'Monte la tension',Refrain:'Tout le monde, en cascade',Pont:'Respire : nappe, mélodie, voix',Final:'Le module entier'};
+function phraseOf(s){const v=PHRASE[s.type];return v[(game.desc.seed+s.level)%v.length]}
 const FACE_TF=['rotateY(0deg)','rotateY(90deg)','rotateY(180deg)','rotateY(-90deg)','rotateX(90deg)','rotateX(-90deg)'];
 const FACE_VIEW=['rotateY(0deg)','rotateY(-90deg)','rotateY(-180deg)','rotateY(90deg)','rotateX(-90deg)','rotateX(90deg)'];
 const FACE_OF={Intro:0,Couplet:1,'Pré-refrain':2,Refrain:3,Pont:4,Final:5};
@@ -175,6 +193,9 @@ const $=id=>document.getElementById(id);
 
 const game={on:false,score:0,combo:1,maxCombo:1,groove:1,events:[],cues:[],cueIdx:0,phraseStep:0,face:0,desc:null,taps:0,hits:0,perfect:0,misses:0,lastDrainBeat:0,sections:0,secOk:0};
 let rng=Math.random;
+const todayKey=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+let dailyMode=load('modul-daily',true);
+function dailySeed(){let h=2166136261;for(const c of todayKey())h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0}
 
 /* ---------- cube ---------- */
 function buildCube(){const c=$('cube');c.innerHTML='';for(let f=0;f<6;f++){const face=document.createElement('div');face.className='face';face.dataset.f=f;face.style.setProperty('--tf',FACE_TF[f]);
@@ -189,7 +210,7 @@ function padCenter(i){const f=document.querySelector('.face.active'),p=padEl(i);
 /* ---------- chef d'orchestre : ondes causales ---------- */
 /* une cue = {beat, pad, state:'wait'|'ok'|'miss'} ; générée 3 temps d'avance depuis la phrase de la section */
 function cueStep(beat){const s=sectionAt(Math.floor(beat/4));return s.level>=1&&s.type!=='Intro'?.5:1} /* niveau 2+ : ondes sur les croches */
-function cueFor(beat){const bar=Math.floor(beat/4),s=sectionAt(bar);const ph=PHRASE[s.type];const idx=cueStep(beat)===1?(bar*4+Math.floor(beat%4)):Math.floor((beat%8)*2);return {beat,pad:ph[idx%ph.length],state:'wait'}}
+function cueFor(beat){const bar=Math.floor(beat/4),s=sectionAt(bar);const ph=phraseOf(s);const idx=cueStep(beat)===1?(bar*4+Math.floor(beat%4)):Math.floor((beat%8)*2);return {beat,pad:ph[idx%ph.length],state:'wait'}}
 function ensureCues(b){ /* garde des cues jusqu'à b+3 temps */
   while(game.nextCueBeat<=b+3){game.cues.push(cueFor(game.nextCueBeat));game.nextCueBeat+=cueStep(game.nextCueBeat)}
   /* expirer les manquées (après la fenêtre de tolérance) */
@@ -216,19 +237,19 @@ function agent(i,q,t){const d=engine.desc,S=d.S,ch=chordOf(d,Math.max(0,Math.flo
 async function startGame(){
   buildAudio();if(ctx.state==='suspended')await ctx.resume();
   if(!loaded.has(styleId)){$('btnPlay').disabled=true;$('loading').textContent='Chargement des sons…';await loadStyle(styleId,p=>$('loading').textContent=`Chargement des sons ${Math.round(p*100)} %`);$('btnPlay').disabled=false;$('loading').textContent=''}
-  const seed=(Date.now()^Math.floor(Math.random()*1e9))>>>0;const desc=describe(seed,styleId);rng=mulberry32(seed);
+  const seed=dailyMode?dailySeed():(Date.now()^Math.floor(Math.random()*1e9))>>>0;const desc=describe(seed,styleId);rng=mulberry32(seed);game.daily=dailyMode?todayKey():null;
   Object.assign(game,{on:true,desc,score:0,combo:1,maxCombo:1,groove:1,events:[],cues:[],nextCueBeat:1,face:0,taps:0,hits:0,perfect:0,misses:0,lastDrainBeat:0,sections:0,secOk:0,ended:false,warned:false});
   show('game');buildCube();rotateTo(0);$('styleTag').textContent=`${desc.S.n.toUpperCase()} · ${desc.bpm} BPM · ${desc.keyName.toUpperCase()}`;
   document.documentElement.style.setProperty('--bt',(60/desc.bpm)+'s');
   engine.onBar=onBar;engine.onEnd=onEngineEnd;engineStart(desc);
   /* le chef d'orchestre lance l'intro : accords présents dès le départ */
-  addEnergy(2,.5);banner('Intro','Suis l’onde');
+  addEnergy(2,.5);banner('Intro',ORDER.Intro);
   requestAnimationFrame(loop);
 }
 function onBar(bar){if(!game.on)return;const s=sectionAt(bar);
   if(s.pos===0){const prev=sectionAt(bar-1),need=NEED[prev.type];const ok=need.every(i=>engine.energy[i]>.2);game.sections++;
     if(ok){game.secOk++;const bonus=400*(1+prev.level);game.score+=bonus;game.groove=Math.min(1,game.groove+.18);hint(`${prev.type} réussi  +${bonus}`)}
-    rotateTo(FACE_OF[s.type]);banner(s.type+(s.level?' '+(s.level+1):''),s.level>=1?'Ondes sur les croches':NEED[s.type].map(i=>INST[i].n).join(' + '))}}
+    rotateTo(FACE_OF[s.type]);banner(s.type+(s.level?' '+(s.level+1):''),ORDER[s.type]+(s.level>=1?' · croches':''))}}
 function banner(a,b){const el=$('banner');el.firstElementChild.textContent=a.toUpperCase();el.lastElementChild.textContent=b;el.classList.add('show');clearTimeout(banner.t);banner.t=setTimeout(()=>el.classList.remove('show'),1500)}
 function drainRate(bar){return Math.min(.05,.012+bar*.00032)}
 function loop(){if(!game.on)return;const b=beatNow();
@@ -281,24 +302,46 @@ function fire(i,q,t){if(!engine.on)return;agent(i,q,t);game.events.push([Math.ro
 function endGame(){if(game.ended)return;game.ended=true;game.on=false;
   const b=beatNow(),bars=Math.max(1,Math.ceil(b/4));engine.endBar=bars;
   const acc=game.taps?Math.round(100*(game.hits+game.perfect)/(2*Math.max(game.taps,game.hits+game.misses))):0;
-  const track={id:'m'+Date.now().toString(36),ts:Date.now(),app:'modul',name:game.desc.name,style:game.desc.style,seed:game.desc.seed,bpm:game.desc.bpm,keyName:game.desc.keyName,bars,seconds:Math.round(bars*4*engine.beat),score:game.score,sections:game.sections,maxCombo:game.maxCombo,events:game.events,accuracy:acc};
+  const track={id:'m'+Date.now().toString(36),ts:Date.now(),app:'modul',daily:game.daily,name:game.desc.name,style:game.desc.style,seed:game.desc.seed,bpm:game.desc.bpm,keyName:game.desc.keyName,bars,seconds:Math.round(bars*4*engine.beat),score:game.score,sections:game.sections,maxCombo:game.maxCombo,events:game.events,accuracy:acc};
   const mine=load('modul-tracks',[]);mine.unshift(track);save('modul-tracks',mine.slice(0,100));current=track;showTrack(track,true);
-  api('/api/tracks',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...track,player:playerId(),name:'MODUL · '+track.name})}).then(r=>{track.remoteId=r.id;save('modul-tracks',mine.slice(0,100));$('rank').textContent='Enregistré · classement anonyme'}).catch(()=>{$('rank').textContent='Enregistré sur cet appareil'})}
+  api('/api/tracks',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...track,player:playerId(),name:'MODUL · '+track.name})}).then(r=>{track.remoteId=r.id;save('modul-tracks',mine.slice(0,100));$('btnShare').disabled=false;return api(track.daily?'/api/tracks?daily='+track.daily:'/api/tracks?limit=100')}).then(dd=>{const pos=dd.tracks.findIndex(x=>x.id===track.remoteId);$('rank').textContent=pos>=0?`${pos+1}${pos?'e':'er'} ${track.daily?'du module du jour':'du Top 30 jours'} · classement anonyme`:'Enregistré · classement anonyme'}).catch(()=>{$('rank').textContent='Enregistré sur cet appareil'})}
 function onEngineEnd(){if(replaying){replaying=false;$('cover').classList.remove('playing');$('btnReplay').textContent='Réécouter'}}
 let current=null,replaying=false;
 function coverOf(t){const r=mulberry32((t.seed>>>0)+11);const a=Math.floor(r()*6),b=(a+1+Math.floor(r()*4))%6,c=(b+1+Math.floor(r()*3))%6,ang=Math.floor(r()*360);return `linear-gradient(${ang}deg,${INST[a].c},${INST[b].c} 55%,${INST[c].c})`}
+function structureOf(bars){const out=[];let b=0;while(b<bars){const s=sectionAt(b);const len=Math.min(s.len-s.pos,bars-b);out.push({type:s.type,level:s.level,len});b+=len}return out}
 function showTrack(t,fresh){show('end');$('cover').style.setProperty('--cover',coverOf(t));$('cover').style.setProperty('--beat',(60/t.bpm)+'s');$('tName').textContent=t.name;
-  $('tMeta').innerHTML=`<b>${fmt(t.seconds)}</b> · ${t.bars} mesures · ${STYLES[t.style]?STYLES[t.style].n:'Pop'}<br>${t.keyName} · ${t.bpm} BPM · ${Number(t.score).toLocaleString('fr-FR')} pts · combo ×${t.maxCombo} · précision ${t.accuracy} %`;$('rank').textContent=fresh?'…':''}
+  const st=STYLES[t.style]?t.style:'pop',d=describe(t.seed,st);
+  $('tMeta').innerHTML=`<b>${fmt(t.seconds)}</b> · ${t.bars} mesures · ${STYLES[st].n}${t.daily?' · module du '+t.daily:''}<br>${t.keyName} · ${t.bpm} BPM · ${Number(t.score).toLocaleString('fr-FR')} pts · combo ×${t.maxCombo}${t.accuracy!=null?' · précision '+t.accuracy+' %':''}`;
+  const seen=new Set();$('sheet').innerHTML='<div class="r"><b>Structure</b><span>'+structureOf(t.bars).map(x=>x.type+(x.level?' '+(x.level+1):'')+' '+x.len).join(' · ')+'</span></div>'+
+    structureOf(t.bars).filter(x=>!seen.has(x.type)&&seen.add(x.type)).map(x=>`<div class="r"><span>${x.type}</span><span>${romanOf(d,x.type)}</span></div>`).join('')+
+    `<div class="r"><span>Tempo · tonalité</span><span>${t.bpm} BPM · ${t.keyName}${STYLES[st].swing?' · swing':''}</span></div>`;
+  $('rank').textContent=fresh?'…':'';$('exportInfo').textContent='';$('btnShare').disabled=!(t.remoteId||typeof t.id==='number')}
+async function exportTrack(kind){const t=current;if(!t)return;const info=$('exportInfo');if(replaying){engineStop();onEngineEnd()}
+  info.textContent='Rendu du morceau…';let ev=t.events;if(!ev&&(t.remoteId!=null||typeof t.id==='number')){try{ev=(await api('/api/tracks?id='+(t.remoteId??t.id))).events}catch(e){ev=[]}}
+  try{const r=await renderTrack({...t,events:ev||[]},p=>info.textContent=`Rendu du morceau ${Math.round(p*100)} %`);const base=`MODUL - ${t.name} - ${t.keyName} ${t.bpm}bpm`;
+    if(kind==='midi'){download(midiBlob(r.notes,r.desc,t.bars),base+'.mid');info.textContent=`MIDI : ${r.notes.length} notes, 5 pistes, tempo et tonalité inclus.`}
+    else{download(wavBlob(r.buffer),base+'.wav');info.textContent=`WAV 44,1 kHz stéréo · ${fmt(r.buffer.duration)}`}}
+  catch(e){info.textContent='Export impossible sur ce navigateur.';console.error(e)}}
+async function shareTrack(){const t=current;const id=t.remoteId??(typeof t.id==='number'?t.id:null);if(id==null)return;const url=new URL(location.href);url.search='?t='+id;
+  const data={title:'MODUL — '+t.name,text:`${t.name} · ${fmt(t.seconds)} · ${t.keyName} · ${t.bpm} BPM`,url:url.toString()};
+  try{if(navigator.share){await navigator.share(data)}else{await navigator.clipboard.writeText(url.toString());$('exportInfo').textContent='Lien copié'}}catch(e){}}
+$('btnMidi').onclick=()=>exportTrack('midi');$('btnWav').onclick=()=>exportTrack('wav');$('btnShare').onclick=shareTrack;
 async function replay(t){if(replaying){engineStop();onEngineEnd();return}const st=STYLES[t.style]?t.style:'pop';buildAudio();if(ctx.state==='suspended')await ctx.resume();if(!loaded.has(st)){$('btnReplay').textContent='Chargement…';await loadStyle(st)}
   replaying=true;$('btnReplay').textContent='Stop';$('cover').classList.add('playing');engine.onBar=null;engine.onEnd=onEngineEnd;engineStart(describe(t.seed,st),{events:t.events||[],bars:t.bars})}
-function showList(){show('list');const el=$('items');const items=load('modul-tracks',[]);el.innerHTML=items.length?'':'<div class="empty">Aucun morceau pour l’instant.</div>';
-  items.forEach((t,k)=>{const b=document.createElement('button');b.className='item';b.style.setProperty('--cover',coverOf(t));b.innerHTML=`<span class="sq"></span><span><div class="n">${t.name}</div><div class="m">${t.bars} mesures · ${STYLES[t.style]?STYLES[t.style].n:''} · ${Number(t.score).toLocaleString('fr-FR')} pts</div></span><span class="d">${fmt(t.seconds)}</span>`;b.onclick=()=>{current=t;showTrack(t,false)};el.appendChild(b)})}
+let tab='mine';const esc=x=>String(x).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+async function showList(){show('list');const el=$('items');el.innerHTML='<div class="empty">…</div>';let items=[];
+  if(tab==='mine')items=load('modul-tracks',[]);else{try{items=(await api(tab==='daily'?'/api/tracks?daily='+todayKey():'/api/tracks?limit=50')).tracks}catch(e){el.innerHTML='<div class="empty">Classement indisponible hors ligne.</div>';return}}
+  el.innerHTML=items.length?'':'<div class="empty">'+(tab==='daily'?'Personne n’a encore joué le module du jour.':'Aucun morceau pour l’instant.')+'</div>';
+  items.forEach((t,k)=>{const b=document.createElement('button');b.className='item';b.style.setProperty('--cover',coverOf(t));b.innerHTML=`<span class="sq"></span><span><div class="n">${esc(String(t.name).replace(/^MODUL · /,''))}</div><div class="m">${k+1}. ${t.bars} mesures · ${STYLES[t.style]?STYLES[t.style].n:''} · ${Number(t.score).toLocaleString('fr-FR')} pts</div></span><span class="d">${fmt(t.seconds)}</span>`;b.onclick=()=>{current=t;showTrack(t,false)};el.appendChild(b)})}
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));tab=b.dataset.tab;showList()});
 
 /* ---------- navigation ---------- */
 function show(id){['home','game','end','list'].forEach(s=>$(s).classList.toggle('hidden',s!==id))}
 function renderStyles(){const el=$('styles');el.innerHTML='';Object.entries(STYLES).forEach(([id,S])=>{const b=document.createElement('button');b.className='style'+(id===styleId?' on':'');b.style.setProperty('--g',S.g);b.innerHTML=`<b>${S.n}</b><span>${S.d}</span><i></i>`;
   b.onclick=()=>{styleId=id;save('chroma-style',id);renderStyles();buildAudio();if(!loaded.has(id)){$('loading').textContent='Chargement des sons…';loadStyle(id,p=>$('loading').textContent=p<1?`Chargement des sons ${Math.round(p*100)} %`:'')}};el.appendChild(b)})}
-function home(){if(replaying){engineStop();onEngineEnd()}show('home');renderStyles();const best=load('modul-tracks',[]).slice().sort((a,b)=>b.bars-a.bars)[0];$('best').textContent=best?`Record : ${fmt(best.seconds)} · ${best.bars} mesures`:''}
+function renderMode(){document.querySelectorAll('#mode button').forEach(b=>b.classList.toggle('on',(b.dataset.m==='1')===dailyMode))}
+document.querySelectorAll('#mode button').forEach(b=>b.onclick=()=>{dailyMode=b.dataset.m==='1';save('modul-daily',dailyMode);renderMode()});
+function home(){if(replaying){engineStop();onEngineEnd()}show('home');renderStyles();renderMode();const best=load('modul-tracks',[]).slice().sort((a,b)=>b.bars-a.bars)[0];$('best').textContent=best?`Record : ${fmt(best.seconds)} · ${best.bars} mesures`:''}
 let pendingStart=false;
 $('btnPlay').onclick=()=>{if(!load('modul-how',false)){pendingStart=true;$('howOk').textContent='C’est parti';$('how').classList.remove('hidden');return}startGame()};
 $('howOk').onclick=()=>{save('modul-how',true);$('how').classList.add('hidden');if(pendingStart){pendingStart=false;startGame()}};
@@ -308,6 +351,8 @@ $('btnReplay').onclick=()=>current&&replay(current);
 $('btnList').onclick=showList;$('btnBack').onclick=home;$('btnClose').onclick=home;
 document.addEventListener('visibilitychange',()=>{if(!ctx)return;if(document.hidden){if(game.on||replaying)ctx.suspend()}else ctx.resume()});
 home();
+/* lien partagé : ?t=<id> ouvre la fiche du morceau */
+(async()=>{const id=new URLSearchParams(location.search).get('t');if(!id)return;try{const t=await api('/api/tracks?id='+encodeURIComponent(id));t.name=String(t.name).replace(/^MODUL · /,'');current=t;showTrack(t,false)}catch(e){}})();
 </script>
 </body>
 </html>

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b0c0d">
 <title>Studio — MUSICBOX · Faites écouter, pas défiler</title>
-<meta name="description" content="Le Studio MUSICBOX : placez un titre, un podcast, une bande-annonce ou un événement dans CHROMA. Vous payez des pistes jouées en entier, jamais des impressions.">
+<meta name="description" content="Le Studio MUSICBOX : placez un titre, un podcast, une bande-annonce ou un événement dans la version scène de MODUL. Vous payez des pistes jouées en entier, jamais des impressions.">
 <link rel="stylesheet" href="../assets/platform.css">
 <style>
 .types{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:6px}
@@ -26,16 +26,16 @@
 </head>
 <body>
 <header><div class="wrap nav">
-<a class="brand" href="../"><span class="brand-mark"><i></i><i></i><i></i><i></i></span>CHROMA<small>STUDIO</small></a>
+<a class="brand" href="../"><span class="brand-mark"><i></i><i></i><i></i><i></i></span>MODUL<small>STUDIO</small></a>
 <nav class="nav-links"><a href="../#principe">Le principe</a><a href="../cote/">La Cote</a><a class="active" href="./">Studio</a><a href="../#economie">Transparence</a></nav>
-<a class="btn primary small" href="../scene/">Jouer CHROMA</a>
+<a class="btn primary small" href="../scene/">Jouer MODUL</a>
 </div></header>
 
 <main class="wrap">
 <div class="page-head">
 <div class="eyebrow green">STUDIO PARTENAIRES</div>
 <h1>Faites écouter.<br>Pas défiler.</h1>
-<p>Placez ce qui mérite trois minutes d’attention — un titre, un podcast, une bande-annonce, un événement, une marque portée par un artiste — dans les niveaux de CHROMA. Vous payez des <b>pistes jouées en entier</b>, jamais des impressions. Et chaque piste est marquée <span class="tag sponsor">PARTENAIRE</span>, toujours.</p>
+<p>Placez ce qui mérite trois minutes d’attention — un titre, un podcast, une bande-annonce, un événement, une marque portée par un artiste — dans les niveaux de la version scène. Vous payez des <b>pistes jouées en entier</b>, jamais des impressions. Et chaque piste est marquée <span class="tag sponsor">PARTENAIRE</span>, toujours.</p>
 </div>
 
 <div class="demo-banner"><b>PROTOTYPE</b><span>Le Studio fonctionne (vos campagnes sont enregistrées sur cet appareil et le lien de piste est réel), mais l’inventaire et les estimations sont des <b>données de démonstration</b>. Pendant le pilote, les placements sont gratuits et choisis avec vous.</span></div>
@@ -69,7 +69,7 @@
 </div>
 <div class="card" style="margin-top:16px" id="dash"></div>
 <div class="rules"><h3>Ce que vous achetez exactement</h3><ul>
-<li><b>Une piste jouée</b> = un niveau de CHROMA terminé sur votre contenu : ≈ 3 minutes, mains sur le morceau. Un niveau abandonné avant 50 % n’est pas facturé.</li>
+<li><b>Une piste jouée</b> = un niveau de la version scène terminé sur votre contenu : ≈ 3 minutes, mains sur le morceau. Un niveau abandonné avant 50 % n’est pas facturé.</li>
 <li><b>Le taux « dans le tempo »</b> : part des gestes du joueur calés sur votre beat. C’est une preuve d’attention impossible à simuler par un bot ou un onglet en arrière-plan.</li>
 <li><b>Les partages</b> portent le code du joueur ; <b>les conversions</b> sont attribuées à ce code. Le joueur prescripteur touche une commission sur la vente — jamais sur le clic.</li>
 <li><b>Rien n’est généré ailleurs</b> : aucun stream, aucune vue, aucun clic n’est envoyé vers Spotify, YouTube ou une régie. Votre contenu est écouté ici, et vos fans convertissent chez vous.</li>
@@ -112,7 +112,7 @@ function saveAll(c){try{localStorage.setItem('musicbox-campaigns',JSON.stringify
 function trackLink(c){const u=new URL('../scene/',location.href);u.searchParams.set('track',c.audio);u.searchParams.set('artist',c.artist);u.searchParams.set('title',c.title);if(valid(c.link))u.searchParams.set('link',c.link);u.searchParams.set('partner','1');return u.toString()}
 function renderCampaigns(){
 const list=load();
-$('campaigns').innerHTML=list.length?list.map((c,i)=>'<div class="camp"><div><b>'+c.title+' <span class="tag sponsor">PARTENAIRE</span></b><small>'+c.artist+' · '+c.type+' · '+c.regions.join(', ')+' · '+c.budget+' € / '+c.days+' j</small><small style="display:block;margin-top:4px;word-break:break-all"><a href="'+c.url+'" target="_blank" rel="noopener">'+c.url+'</a></small></div><div style="text-align:right"><div class="status'+(i===list.length-1?' live':'')+'">'+(i===list.length-1?'PRÊTE · LIEN ACTIF':'ENREGISTRÉE')+'</div><button class="btn ghost small" type="button" data-copy="'+i+'" style="margin-top:8px">Copier le lien</button></div></div>').join(''):'<div class="empty" style="margin-top:12px">Aucune campagne pour l’instant. Créez-en une : le lien de piste fonctionne immédiatement dans CHROMA.</div>';
+$('campaigns').innerHTML=list.length?list.map((c,i)=>'<div class="camp"><div><b>'+c.title+' <span class="tag sponsor">PARTENAIRE</span></b><small>'+c.artist+' · '+c.type+' · '+c.regions.join(', ')+' · '+c.budget+' € / '+c.days+' j</small><small style="display:block;margin-top:4px;word-break:break-all"><a href="'+c.url+'" target="_blank" rel="noopener">'+c.url+'</a></small></div><div style="text-align:right"><div class="status'+(i===list.length-1?' live':'')+'">'+(i===list.length-1?'PRÊTE · LIEN ACTIF':'ENREGISTRÉE')+'</div><button class="btn ghost small" type="button" data-copy="'+i+'" style="margin-top:8px">Copier le lien</button></div></div>').join(''):'<div class="empty" style="margin-top:12px">Aucune campagne pour l’instant. Créez-en une : le lien de piste fonctionne immédiatement dans la version scène de MODUL.</div>';
 $('campaigns').querySelectorAll('[data-copy]').forEach(b=>b.onclick=async()=>{const c=load()[Number(b.dataset.copy)];try{await navigator.clipboard.writeText(c.url);b.textContent='Copié !'}catch(e){prompt('Lien de piste',c.url)}});
 renderDash(list[list.length-1]);
 }

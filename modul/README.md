@@ -1,9 +1,9 @@
-# MUSICBOX · CHROMA
+# MODUL (ex-CHROMA · MUSICBOX)
 
 Plateforme de l'écoute prouvée. Un fichier HTML par page, zéro dépendance, un serveur Node sans paquet.
 
 ```
-chroma/
+modul/
 ├── index.html          MUSICBOX — landing (principe, mécanique, plateforme, artistes, économie, FAQ)
 ├── modul/              MODUL — prototype « cube » : 6 faces = 6 sections, 16 agents par face, ondes causales du chef d'orchestre, tracé de phrases (engine.js partagé)
 ├── play/               CHROMA — le jeu principal : un plateau, un tempo, compose le morceau le plus long
@@ -12,13 +12,13 @@ chroma/
 ├── cote/               La Cote — classement par écoute prouvée (démo → réel dès qu'il y a des données)
 ├── studio/             Le Studio — régie partenaires (coût par piste jouée, inventaire réel si disponible)
 ├── assets/             CSS partagé, données de démonstration (étiquetées comme telles)
-└── server/             API + statique : node chroma/server/server.mjs  (Node ≥ 22.13, SQLite intégré)
+└── server/             API + statique : node modul/server/server.mjs  (Node ≥ 22.13, SQLite intégré)
 ```
 
 ## Lancer
 
 ```
-node chroma/server/server.mjs        # PORT=8090 HOST=0.0.0.0 MUSICBOX_DATA=chroma/server/data
+node modul/server/server.mjs        # PORT=8090 HOST=0.0.0.0 MUSICBOX_DATA=modul/server/data
 ```
 
 Sans serveur, les pages statiques fonctionnent aussi (La Cote et le Studio restent en mode démonstration).

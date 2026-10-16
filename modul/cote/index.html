@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b0c0d">
 <title>La Cote — MUSICBOX · Le classement de l'écoute prouvée</title>
-<meta name="description" content="La Cote classe les titres par écoute réelle dans CHROMA : pistes jouées, minutes, taps dans le tempo, partages, conversions. Rien ne s'achète, rien ne se revend.">
+<meta name="description" content="La Cote classe les titres par écoute réelle dans la version scène de MODUL : pistes jouées, minutes, taps dans le tempo, partages, conversions. Rien ne s'achète, rien ne se revend.">
 <link rel="stylesheet" href="../assets/platform.css">
 <style>
 .hero-cote{display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:end}
@@ -28,9 +28,9 @@
 </head>
 <body>
 <header><div class="wrap nav">
-<a class="brand" href="../"><span class="brand-mark"><i></i><i></i><i></i><i></i></span>CHROMA<small>LA COTE</small></a>
+<a class="brand" href="../"><span class="brand-mark"><i></i><i></i><i></i><i></i></span>MODUL<small>LA COTE</small></a>
 <nav class="nav-links"><a href="../#principe">Le principe</a><a class="active" href="./">La Cote</a><a href="../studio/">Studio</a><a href="../#economie">Transparence</a></nav>
-<a class="btn primary small" href="../scene/">Jouer CHROMA</a>
+<a class="btn primary small" href="../scene/">Jouer MODUL</a>
 </div></header>
 
 <main class="wrap">
@@ -38,7 +38,7 @@
 <div>
 <div class="eyebrow green">LE CLASSEMENT DE L’ÉCOUTE PROUVÉE</div>
 <h1>La Cote.<br>Ce qui monte, parce que des gens écoutent vraiment.</h1>
-<p>Pas de streams en arrière-plan, pas de likes achetés. La Cote classe les titres joués dans CHROMA selon l’écoute réelle : pistes jouées en entier, taps dans le tempo, partages, conversions. Elle se lit comme un cours — mais rien ne s’achète ni ne se revend.</p>
+<p>Pas de streams en arrière-plan, pas de likes achetés. La Cote classe les titres joués dans la version scène de MODUL selon l’écoute réelle : pistes jouées en entier, taps dans le tempo, partages, conversions. Elle se lit comme un cours — mais rien ne s’achète ni ne se revend.</p>
 </div>
 <div class="method"><h3>Comment la Cote est calculée</h3>
 <div class="f">cote = pistes jouées (7 j) × (1 + taux dans le tempo)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ 0,6 × partages + 6 × conversions</div>
@@ -118,7 +118,7 @@ th.style.display=tab==='mine'?'none':'';
 const html=tab==='mine'?rowsMine():rowsCote();
 tb.innerHTML=html;
 const e=$('empty');e.style.display=html?'none':'block';
-e.textContent=tab==='mine'?'Aucune partie enregistrée sur cet appareil pour l’instant. Jouez une piste dans CHROMA : elle apparaîtra ici, et chargez un vrai titre via « Scène » pour qu’il compte comme écoute prouvée.':'Aucun titre pour ce filtre.';
+e.textContent=tab==='mine'?'Aucune partie enregistrée sur cet appareil pour l’instant. Jouez une piste dans la version scène de MODUL : elle apparaîtra ici, et chargez un vrai titre via « Scène » pour qu’il compte comme écoute prouvée.':'Aucun titre pour ce filtre.';
 $('demoBanner').style.display=tab==='mine'?'none':'flex';
 if(mode==='real'){$('demoBanner').innerHTML='<b style="color:var(--accent)">DONNÉES RÉELLES</b><span>'+fmt(REAL.rawPlays30)+' niveaux joués sur 30 jours, agrégés par le serveur MUSICBOX. Seuls les niveaux terminés ou joués au-delà de 50 % comptent. Mis à jour le '+new Date(REAL.generatedAt).toLocaleString('fr')+'.</span>';$('demoBanner').style.borderColor='#1f5a3f';$('demoBanner').style.background='#0e1a13';$('demoBanner').style.color='#bfe8d0'}else{$('demoBanner').innerHTML='<b>DONNÉES DE DÉMONSTRATION</b><span>Ces artistes et ces chiffres sont inventés pour montrer l’interface.'+(REAL?' Des données réelles existent : cliquez « Données réelles ».':' La Cote réelle démarrera avec les écoutes du pilote.')+' Vos propres parties, elles, sont réelles (onglet « Vos écoutes »).</span>';$('demoBanner').style.borderColor='';$('demoBanner').style.background='';$('demoBanner').style.color=''}
 }

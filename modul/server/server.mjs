@@ -6,8 +6,8 @@
        GET  /api/cote      agrégats 30 jours : classement, inventaire par région, totaux
        GET/POST /api/tracks  morceaux composés dans le jeu (classement « playlist », rejouables)
        GET  /api/health
-   Données : SQLite (node:sqlite) dans chroma/server/data/musicbox.db
-   Lancement : node chroma/server/server.mjs   (PORT=8090 par défaut, HOST=0.0.0.0)
+   Données : SQLite (node:sqlite) dans modul/server/data/musicbox.db
+   Lancement : node modul/server/server.mjs   (PORT=8090 par défaut, HOST=0.0.0.0)
 */
 import http from 'node:http';
 import fs from 'node:fs';
@@ -39,9 +39,11 @@ CREATE TABLE IF NOT EXISTS tracks(
 CREATE INDEX IF NOT EXISTS tracks_bars ON tracks(bars);
 `);
 try{db.exec('ALTER TABLE tracks ADD COLUMN style TEXT')}catch(e){}
-const insTrack=db.prepare(`INSERT INTO tracks(ts,player,name,seed,bpm,key_name,bars,seconds,score,sections,max_combo,events,style) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)`);
-const selTop=db.prepare(`SELECT id,ts,player,name,seed,bpm,key_name keyName,bars,seconds,score,sections,max_combo maxCombo,style FROM tracks WHERE ts>=? ORDER BY bars DESC, score DESC LIMIT ?`);
-const selTrack=db.prepare(`SELECT id,ts,player,name,seed,bpm,key_name keyName,bars,seconds,score,sections,max_combo maxCombo,style,events FROM tracks WHERE id=?`);
+try{db.exec('ALTER TABLE tracks ADD COLUMN daily TEXT')}catch(e){}
+const insTrack=db.prepare(`INSERT INTO tracks(ts,player,name,seed,bpm,key_name,bars,seconds,score,sections,max_combo,events,style,daily) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
+const selTop=db.prepare(`SELECT id,ts,player,name,seed,bpm,key_name keyName,bars,seconds,score,sections,max_combo maxCombo,style,daily FROM tracks WHERE ts>=? ORDER BY bars DESC, score DESC LIMIT ?`);
+const selDaily=db.prepare(`SELECT id,ts,player,name,seed,bpm,key_name keyName,bars,seconds,score,sections,max_combo maxCombo,style,daily FROM tracks WHERE daily=? ORDER BY bars DESC, score DESC LIMIT ?`);
+const selTrack=db.prepare(`SELECT id,ts,player,name,seed,bpm,key_name keyName,bars,seconds,score,sections,max_combo maxCombo,style,daily,events FROM tracks WHERE id=?`);
 const insPlay=db.prepare(`INSERT INTO plays(ts,player,title,artist,track_url,partner,real,win,collected,goal,on_beat,taps,minutes,region,daily) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
 const insEvent=db.prepare(`INSERT INTO events(ts,player,type,title,artist,track_url,region) VALUES(?,?,?,?,?,?,?)`);
 const selPlays=db.prepare(`SELECT * FROM plays WHERE ts>=? ORDER BY ts`);
@@ -112,14 +114,16 @@ if(p==='/api/events'&&req.method==='POST'){
 if(p==='/api/tracks'&&req.method==='GET'){
   const id=url.searchParams.get('id');
   if(id){const t=selTrack.get(int(id,0,1e12));if(!t)return send(res,404,{error:'inconnu'});t.events=JSON.parse(t.events||'[]');return send(res,200,t)}
-  return send(res,200,{days:30,tracks:selTop.all(Date.now()-30*DAY,int(url.searchParams.get('limit')||50,1,100))});
+  const daily=url.searchParams.get('daily');const lim=int(url.searchParams.get('limit')||50,1,100);
+  if(daily&&/^\d{4}-\d{2}-\d{2}$/.test(daily))return send(res,200,{daily,tracks:selDaily.all(daily,lim)});
+  return send(res,200,{days:30,tracks:selTop.all(Date.now()-30*DAY,lim)});
 }
 if(p==='/api/tracks'&&req.method==='POST'){
   if(!allow(ip))return send(res,429,{error:'trop de requêtes'});
   const b=await readJson(req);const name=str(b.name,60),events=Array.isArray(b.events)?b.events.slice(0,4000):[];
   const bars=int(b.bars,1,100000);if(!name||!bars)return send(res,400,{error:'name et bars requis'});
   const ev=events.filter(e=>Array.isArray(e)&&e.length===4).map(e=>[num(e[0],0,1e6),int(e[1],0,5),int(e[2],2,99),e[3]?1:0]);
-  const r=insTrack.run(Date.now(),str(b.player,40)||'anon',name,int(b.seed,0,2**31),int(b.bpm,60,200),str(b.keyName,20)||null,bars,num(b.seconds,0,36000),int(b.score,0,1e9),int(b.sections,0,9999),int(b.maxCombo,0,999),JSON.stringify(ev),str(b.style,20)||null);
+  const r=insTrack.run(Date.now(),str(b.player,40)||'anon',name,int(b.seed,0,2**31),int(b.bpm,60,200),str(b.keyName,20)||null,bars,num(b.seconds,0,36000),int(b.score,0,1e9),int(b.sections,0,9999),int(b.maxCombo,0,999),JSON.stringify(ev),str(b.style,20)||null,/^\d{4}-\d{2}-\d{2}$/.test(String(b.daily||''))?String(b.daily):null);
   return send(res,201,{ok:true,id:Number(r.lastInsertRowid)});
 }
 if(p.startsWith('/api/'))return send(res,404,{error:'inconnu'});
@@ -133,4 +137,4 @@ fs.createReadStream(file).pipe(res);
 }catch(e){send(res,500,{error:'erreur serveur'})}
 });
 const PORT=Number(process.env.PORT||8090),HOST=process.env.HOST||'0.0.0.0';
-server.listen(PORT,HOST,()=>console.log(`[musicbox] http://${HOST}:${PORT}  données : ${DATA_DIR}`));
+server.listen(PORT,HOST,()=>console.log(`[modul] http://${HOST}:${PORT}  données : ${DATA_DIR}`));
